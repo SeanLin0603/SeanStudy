@@ -34,25 +34,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Corex.Core">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\lib\Corex.Core.dll</HintPath>
+      <HintPath>..\lib\Corex.Core.dll</HintPath>
     </Reference>
     <Reference Include="Corex.UI">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\lib\Corex.UI.dll</HintPath>
+      <HintPath>..\lib\Corex.UI.dll</HintPath>
     </Reference>
     <Reference Include="Corex.Vision">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\lib\Corex.Vision.dll</HintPath>
+      <HintPath>..\lib\Corex.Vision.dll</HintPath>
     </Reference>
     <Reference Include="Corex.VisionLib">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\measuring\bin\Debug\Corex.VisionLib.dll</HintPath>
+      <HintPath>..\lib\Corex.VisionLib.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\lib\Emgu.CV.dll</HintPath>
+      <HintPath>..\lib\Emgu.CV.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV.UI">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\lib\Emgu.CV.UI.dll</HintPath>
+      <HintPath>..\lib\Emgu.CV.UI.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.Util">
-      <HintPath>..\..\..\..\Documents\Gitkraken\CxVisAlgo\lib\Emgu.Util.dll</HintPath>
+      <HintPath>..\lib\Emgu.Util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
