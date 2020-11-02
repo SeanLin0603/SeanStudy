@@ -61,18 +61,25 @@ namespace ConvexHull
                         Matrix<int> defectMatrix = new Matrix<int>(defect.Rows, defect.Cols, defect.NumberOfChannels);
                         defect.CopyTo(defectMatrix);
 
-                        for (int j = 0; j < defectMatrix.Rows; j++)
+                        for (int r = 0; r < defectMatrix.Rows; r++)
                         {
-                            int startIdx = defectMatrix.Data[j, 0];
-                            int endIdx = defectMatrix.Data[j, 1];
-                            int farIdx = defectMatrix.Data[j, 2];
+                            int startIdx = defectMatrix.Data[r, 0];
+                            int endIdx = defectMatrix.Data[r, 1];
+                            int farIdx = defectMatrix.Data[r, 2];
                             Point startPoint = contour[startIdx];
                             Point endPoint = contour[endIdx];
                             Point farPoint = contour[farIdx];
-                            
+
                             // draw a line connecting the convexity defect start point and end point in thin red line
-                            CvInvoke.Line(imgBGR, startPoint, endPoint, new MCvScalar(0, 0, 255, 255), 2);
-                            CvInvoke.Circle(imgBGR, farPoint, 1, new MCvScalar(0, 255, 0, 255), 2);
+                            CvInvoke.Line(imgBGR, startPoint, endPoint, new MCvScalar(0, r * 40, 255, 255), 2);
+
+                            if (r > 0)
+                            {
+                                Point middlePoint = middle(startPoint, endPoint);
+                                Point adjustPoint = middle(middlePoint, farPoint);
+                                CvInvoke.Circle(imgBGR, adjustPoint, 1, new MCvScalar(0, 255, 0, 255), 2);
+                                CvInvoke.Circle(imgBGR, farPoint, 1, new MCvScalar(255, 0, r * 40, 255), 2);
+                            }
                         }
                     }
                 }
@@ -80,5 +87,17 @@ namespace ConvexHull
 
             CvInvoke.Imshow("thres100", imgBGR);
         }
+
+        private static Point middle(Point p1, Point p2)
+        {
+            return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
+        }
+
+
+
+
+
+
+
     }
 }
