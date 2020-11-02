@@ -86,7 +86,8 @@ namespace ConvexHull
                                 fittingContour.Add(adjustPoint);
                                 fittingContour.Add(endPoint);
 
-                                CvInvoke.Circle(imgBGR, adjustPoint, 1, new MCvScalar(0, 255, 0, 255), 2);
+                                CvInvoke.Circle(imgBGR, middlePoint, 1, new MCvScalar(0, 255, 0, 255), 2);
+                                CvInvoke.Circle(imgBGR, adjustPoint, 1, new MCvScalar(255, 255, 0, 255), 2);
                                 CvInvoke.Circle(imgBGR, farPoint, 1, new MCvScalar(255, 0, r * 40, 255), 2);
                             }
                         }
