@@ -29,6 +29,7 @@ namespace ConvexHull
                 {
                     var inputImage = new Image<Gray, byte>(ofd.FileName);
                     inputImage = inputImage.ThresholdBinary(new Gray(100), new Gray(255));
+                    CvInvoke.GaussianBlur(inputImage, inputImage, new Size(5, 5), 5);
 
                     //CvInvoke.Imshow("inputImage", inputImage);
                     doConvexHull(inputImage);
@@ -47,6 +48,7 @@ namespace ConvexHull
                 CvInvoke.FindContours(image, contours, null, RetrType.External, ChainApproxMethod.ChainApproxNone);
                 //CvInvoke.DrawContours(imgBGR, contours, -1, new MCvScalar(0, 255, 0, 255), 2);
 
+                List<Point> fittingContour = new List<Point>();
 
                 for (int i = 0; i < contours.Size; i++)
                 {
@@ -73,16 +75,27 @@ namespace ConvexHull
                             // draw a line connecting the convexity defect start point and end point in thin red line
                             CvInvoke.Line(imgBGR, startPoint, endPoint, new MCvScalar(0, r * 40, 255, 255), 2);
 
-                            if (r > 0)
+                            if (r == 0)
+                            {
+                                fittingContour.Add(startPoint);
+                            }
+                            else if (r > 0)
                             {
                                 Point middlePoint = middle(startPoint, endPoint);
                                 Point adjustPoint = middle(middlePoint, farPoint);
+                                fittingContour.Add(adjustPoint);
+                                fittingContour.Add(endPoint);
+
                                 CvInvoke.Circle(imgBGR, adjustPoint, 1, new MCvScalar(0, 255, 0, 255), 2);
                                 CvInvoke.Circle(imgBGR, farPoint, 1, new MCvScalar(255, 0, r * 40, 255), 2);
                             }
                         }
+
+                        imgBGR.Draw(fittingContour.ToArray(), new Bgra(255, 255, 0, 255), 2);
                     }
                 }
+
+
             }
 
             CvInvoke.Imshow("thres100", imgBGR);
@@ -92,12 +105,6 @@ namespace ConvexHull
         {
             return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
         }
-
-
-
-
-
-
 
     }
 }
