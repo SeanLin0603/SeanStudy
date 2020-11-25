@@ -29,9 +29,8 @@ namespace ConvexHull
                 {
                     var inputImage = new Image<Gray, byte>(ofd.FileName);
                     inputImage = inputImage.ThresholdBinary(new Gray(100), new Gray(255));
-                    //CvInvoke.GaussianBlur(inputImage, inputImage, new Size(5, 5), 5);
+                    CvInvoke.GaussianBlur(inputImage, inputImage, new Size(5, 5), 5);
 
-                    //CvInvoke.Imshow("inputImage", inputImage);
                     //doConvexHull(inputImage);
                     morphology(inputImage);
                 }
@@ -45,99 +44,86 @@ namespace ConvexHull
             int width = image.Width;
             int height = image.Height;
 
-            var gradient = image.Clone();
-            Mat structElement = CvInvoke.GetStructuringElement(ElementShape.Cross, new Size(3, 3), new Point(-1, -1));
-            CvInvoke.MorphologyEx(image, gradient, MorphOp.Gradient, structElement, new Point(-1, -1), 3, BorderType.Default, new MCvScalar(0, 0, 0));
-            CvInvoke.Imshow("gradient", gradient);
+            #region MaskApproach
+            //var gradient = image.Clone();
+            //Mat structElement = CvInvoke.GetStructuringElement(ElementShape.Cross, new Size(3, 3), new Point(-1, -1));
+            //CvInvoke.MorphologyEx(image, gradient, MorphOp.Gradient, structElement, new Point(-1, -1), 1, BorderType.Default, new MCvScalar(0, 0, 0));
+            ////CvInvoke.Imshow("gradient", gradient);
 
-            Image<Gray, byte> mask = new Image<Gray, byte>(image.Size);
-            Image<Gray, byte> result = new Image<Gray, byte>(image.Size);
+            //Image<Gray, byte> mask = new Image<Gray, byte>(image.Size);
+            //Image<Gray, byte> result = new Image<Gray, byte>(image.Size);
 
-            List<Point> points = new List<Point>();
+            //List<Point> points = new List<Point>();
 
+            //// initial parameter
+            //MCvScalar white = new MCvScalar(255, 255, 255, 255);
+            //Point center = new Point(217, 172);
+            //int radius = 160;
+            ////Point center = new Point(width / 2, height / 2);
+            ////int radius = Math.Min(width, height) / 2;
+            //int step = 20;
 
-            // initial parameter
-            Point center = new Point(217, 172);
-            int radius = 160;
-            MCvScalar color = new MCvScalar(255, 255, 255, 255);
-
-            CvInvoke.Imshow("mask", mask);
-
-            int step = 50;
-            for (int i = 0; i < step; i++)
-            {
-                Image<Gray, byte> mul = new Image<Gray, byte>(image.Size);
-                mask.SetZero();
-                int rad =  radius - i * 2;
-                CvInvoke.Circle(mask, center, rad, color, 2);
-
-                for (int r = 0; r < height; r++)
-                {
-                    for (int c = 0; c < width; c++)
-                    {
-                        int value = 0;
-                        value = gradient.Data[r, c, 0] * mask.Data[r, c, 0];
-
-                        if (value > 0)
-                        {
-                            // border
-                            value = 255;
-                            points.Add(new Point(c, r));
-                        }
-                        else
-                        {
-                            value = 0;
-                        }
-
-                        mul.Data[r, c, 0] = (byte)value;
-                    }
-                }
-
-                result = result.Add(mul);
-                CvInvoke.Imshow("result", result);
-                //CvInvoke.Imshow("mul" + i.ToString(), mul);
-            }
-
-
-            //imgBGR.Draw(points.ToArray(), new Bgra(0, 0, 255, 255), 1);
-            foreach (Point pt in points)
-            {
-                imgBGR.Draw(new CircleF(new PointF(pt.X, pt.Y), 0.5f), new Bgra(0, 0, 255, 255), 1);
-            }
-            CvInvoke.Imshow("imgBGR", imgBGR);
-
-            //using (VectorOfPoint hull = new VectorOfPoint())
-            //using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+            //for (int i = 0; i < step; i++)
             //{
-            //    CvInvoke.FindContours(image, contours, null, RetrType.External, ChainApproxMethod.ChainApproxNone);
-            //    //CvInvoke.DrawContours(imgBGR, contours, -1, new MCvScalar(0, 255, 0, 255), 2);
+            //    Image<Gray, byte> mul = new Image<Gray, byte>(image.Size);
+            //    mask.SetZero();
+            //    int rad = radius - i * 5;
 
-            //    for (int i = 0; i < contours.Size; i++)
-            //    {
-            //        VectorOfPoint contour = contours[i];
-            //        CvInvoke.ConvexHull(contour, hull);
-            //    }
+            //    rad = (rad <= 0) ? 1 : rad;
 
-            //    for (int i = 0; i < hull.Size; i++)
-            //    {
-            //        imgBGR.Draw(new CircleF(new PointF(hull[i].X, hull[i].Y), 1), new Bgra(0, i * 10, 255, 255), 2);
+            //    CvInvoke.Circle(mask, center, rad, white, 1);
 
-            //    }
+            //    mul = gradient.Mul(mask);
 
-
-
-
-            //    //imgBGR.Draw(hull.ToArray(), new Bgra(0, 0, 255, 255), 2);
+            //    result = result.Add(mul);
+            //    CvInvoke.Imshow("result", result);
+            //    //CvInvoke.Imshow("mul" + i.ToString(), mul);
             //}
 
+            ////imgBGR.Draw(points.ToArray(), new Bgra(0, 0, 255, 255), 1);
+            //for (int i = 0; i < points.Count; i++)
+            //{
+            //    Point pt = points[i];
+            //    imgBGR.Draw(new CircleF(new PointF(pt.X, pt.Y), 1f), new Bgra(i, 0, 255, 255), 1);
+            //}
             //CvInvoke.Imshow("imgBGR", imgBGR);
+            #endregion
 
+            int rad = 90;
+            List<Point> contourList = new List<Point>();
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+            {
+                CvInvoke.FindContours(image, contours, null, RetrType.External, ChainApproxMethod.ChainApproxNone);
+                //CvInvoke.DrawContours(imgBGR, contours, -1, new MCvScalar(255, 255, 0, 255), 2);
+                //CvInvoke.Imshow("imgBGRold", imgBGR);
 
+                var contour = contours[0];
 
+                // get the gravity point
+                MCvMoments moments = CvInvoke.Moments(contour, false);
+                double m00 = moments.M00;
+                double m10 = moments.M10;
+                double m01 = moments.M01;
+                double gx = m10 / m00;
+                double gy = m01 / m00;
+                Point gravity = new Point((int)gx, (int)gy);
+                imgBGR.Draw(new CircleF(new PointF(gravity.X, gravity.Y), 1f), new Bgra(0, 0, 255, 255), 2);
+
+                contourList = new List<Point>(contour.ToArray());
+                for (int i = 0; i < contour.Size; i++)
+                {
+                    Point point = contour[i];
+                    double dist = distance(point, gravity);
+
+                    if (dist < rad)
+                    {
+                        contourList.Remove(point);
+                    }
+                }
+            }
+            imgBGR.Draw(contourList.ToArray(), new Bgra(0, 255, 0, 255), 2);
+            CvInvoke.Imshow("imgBGR", imgBGR);
         }
-
-
-
 
         private static void doConvexHull(Image<Gray, byte> image)
         {
@@ -197,8 +183,6 @@ namespace ConvexHull
                         imgBGR.Draw(fittingContour.ToArray(), new Bgra(255, 255, 0, 255), 2);
                     }
                 }
-
-
             }
 
             CvInvoke.Imshow("thres100", imgBGR);
@@ -208,6 +192,14 @@ namespace ConvexHull
         {
             return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
         }
+
+        private static double distance(Point p1, Point p2)
+        {
+            int dx = p2.X - p1.X;
+            int dy = p2.Y - p1.Y;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
 
     }
 }
