@@ -7,10 +7,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using Corex.VisionLib;
 
 namespace ConvexHull
 {
@@ -27,16 +30,41 @@ namespace ConvexHull
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    var inputImage = new Image<Gray, byte>(ofd.FileName);
-                    inputImage = inputImage.ThresholdBinary(new Gray(100), new Gray(255));
-                    CvInvoke.GaussianBlur(inputImage, inputImage, new Size(5, 5), 5);
+                    var inputImage = new Image<Bgra, byte>(ofd.FileName);
+                    //inputImage = inputImage.ThresholdBinary(new Gray(100), new Gray(255));
+                    //CvInvoke.GaussianBlur(inputImage, inputImage, new Size(5, 5), 5);
 
-                    Image<Gray, byte> result = new Image<Gray, byte>(inputImage.Size);
-                    ContourMorphology(inputImage, 90, out result);
-                    CvInvoke.Imshow("result", result);
+
+                    //ROIOption roi = new ROIOption(ROIOption.ROIType.SpecROI);
+                    //roi.SpecROI = SpecROI.NewLeftTopModeROI(50, 50, 200, 200);
+                    //Image<Bgra, byte> result = new Image<Bgra, byte>(inputImage.Size);
+                    //GetCircleImage(inputImage, 100, roi, out result);
+                    ////CvInvoke.Imshow("result", result);
+                    
+                    //ContourMorphology(inputImage, 90, out result);
                 }
             }
         }
+
+
+        public static bool GetCircleImage(Image<Bgra, byte> image, int radius, ROIOption roi, out Image<Bgra, byte> result)
+        {
+            result = image.Clone();
+
+            Image<Bgra, byte> mask = new Image<Bgra, byte>(2 * radius, 2 * radius);
+            CircleF circle = new CircleF(new PointF(radius, radius), radius);
+            Bgra white = new Bgra(255, 255, 255, 255);
+            mask.Draw(circle, white, -1);
+
+            var cropImg = ROIOption.GetImage(image, roi);
+            if (cropImg.Size != mask.Size)
+            {
+                return false;
+            }
+            CvInvoke.BitwiseAnd(cropImg, mask, result);
+            return true;
+        }
+
 
         public static bool ContourMorphology(Image<Gray,byte> image, int radius, out Image<Gray,byte> result)
         {
@@ -168,6 +196,7 @@ namespace ConvexHull
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
+        
 
     }
 }

@@ -27,11 +27,14 @@ namespace Barcode
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     var inputImage = new Image<Gray, byte>(ofd.FileName);
-                    ZXing.BarcodeReader reader = new ZXing.BarcodeReader();
+                    CvInvoke.MedianBlur(inputImage, inputImage, 1);
+                    picSrc.Image = inputImage.Bitmap;
+
+                    BarcodeReader reader = new BarcodeReader();
                     reader.Options.TryHarder = true;
                     reader.Options.PossibleFormats = new List<BarcodeFormat>();
                     reader.Options.PossibleFormats.Add(BarcodeFormat.QR_CODE);
-                    ZXing.Result decodeResult = reader.Decode(inputImage.Bitmap);
+                    Result decodeResult = reader.Decode(inputImage.Bitmap);
 
                     int a = 0;
 
