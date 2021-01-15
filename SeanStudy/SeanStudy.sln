@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConvexHull", "ConvexHull\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Barcode", "Barcode\Barcode.csproj", "{932D3C75-F44D-496A-8130-86840B459842}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "camera", "camera\camera.csproj", "{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{932D3C75-F44D-496A-8130-86840B459842}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{932D3C75-F44D-496A-8130-86840B459842}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{932D3C75-F44D-496A-8130-86840B459842}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
