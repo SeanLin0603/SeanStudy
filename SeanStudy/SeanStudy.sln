@@ -5,12 +5,6 @@ VisualStudioVersion = 15.0.28307.1145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeanStudy", "SeanStudy\SeanStudy.csproj", "{FBBBF53F-2779-4657-A14A-E4B5B559DBEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConvexHull", "ConvexHull\ConvexHull.csproj", "{F84EB30A-DBB8-4416-AD15-3F891A924C3E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Barcode", "Barcode\Barcode.csproj", "{932D3C75-F44D-496A-8130-86840B459842}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "camera", "camera\camera.csproj", "{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,18 +15,6 @@ Global
 		{FBBBF53F-2779-4657-A14A-E4B5B559DBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBBBF53F-2779-4657-A14A-E4B5B559DBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBBBF53F-2779-4657-A14A-E4B5B559DBEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F84EB30A-DBB8-4416-AD15-3F891A924C3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F84EB30A-DBB8-4416-AD15-3F891A924C3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F84EB30A-DBB8-4416-AD15-3F891A924C3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F84EB30A-DBB8-4416-AD15-3F891A924C3E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{932D3C75-F44D-496A-8130-86840B459842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{932D3C75-F44D-496A-8130-86840B459842}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{932D3C75-F44D-496A-8130-86840B459842}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{932D3C75-F44D-496A-8130-86840B459842}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E90E3D0-E9AF-4E23-A6E0-B78798D27BF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

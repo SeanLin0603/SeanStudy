@@ -30,8 +30,8 @@
         {
             this.filepath = new System.Windows.Forms.TextBox();
             this.btnbrowse = new System.Windows.Forms.Button();
-            this.srcpic = new System.Windows.Forms.PictureBox();
-            this.dstpic = new System.Windows.Forms.PictureBox();
+            this.picSrc = new System.Windows.Forms.PictureBox();
+            this.picDst = new System.Windows.Forms.PictureBox();
             this.btnfindcorner = new System.Windows.Forms.Button();
             this.setwidth = new System.Windows.Forms.NumericUpDown();
             this.setheight = new System.Windows.Forms.NumericUpDown();
@@ -77,8 +77,8 @@
             this.btnSaveMat = new System.Windows.Forms.Button();
             this.btnLoadMat = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.srcpic)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dstpic)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picSrc)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picDst)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.setwidth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.setheight)).BeginInit();
             this.SuspendLayout();
@@ -87,7 +87,7 @@
             // 
             this.filepath.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.filepath.Location = new System.Drawing.Point(9, 28);
-            this.filepath.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.filepath.Margin = new System.Windows.Forms.Padding(2);
             this.filepath.Name = "filepath";
             this.filepath.Size = new System.Drawing.Size(235, 28);
             this.filepath.TabIndex = 0;
@@ -96,7 +96,7 @@
             // 
             this.btnbrowse.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnbrowse.Location = new System.Drawing.Point(248, 17);
-            this.btnbrowse.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnbrowse.Margin = new System.Windows.Forms.Padding(2);
             this.btnbrowse.Name = "btnbrowse";
             this.btnbrowse.Size = new System.Drawing.Size(80, 25);
             this.btnbrowse.TabIndex = 1;
@@ -104,45 +104,45 @@
             this.btnbrowse.UseVisualStyleBackColor = true;
             this.btnbrowse.Click += new System.EventHandler(this.btnbrowse_Click);
             // 
-            // srcpic
+            // picSrc
             // 
-            this.srcpic.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.srcpic.Location = new System.Drawing.Point(9, 79);
-            this.srcpic.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.srcpic.Name = "srcpic";
-            this.srcpic.Size = new System.Drawing.Size(451, 488);
-            this.srcpic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.srcpic.TabIndex = 2;
-            this.srcpic.TabStop = false;
+            this.picSrc.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.picSrc.Location = new System.Drawing.Point(9, 79);
+            this.picSrc.Margin = new System.Windows.Forms.Padding(2);
+            this.picSrc.Name = "picSrc";
+            this.picSrc.Size = new System.Drawing.Size(451, 488);
+            this.picSrc.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picSrc.TabIndex = 2;
+            this.picSrc.TabStop = false;
             // 
-            // dstpic
+            // picDst
             // 
-            this.dstpic.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.dstpic.Location = new System.Drawing.Point(464, 79);
-            this.dstpic.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.dstpic.Name = "dstpic";
-            this.dstpic.Size = new System.Drawing.Size(451, 488);
-            this.dstpic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.dstpic.TabIndex = 2;
-            this.dstpic.TabStop = false;
+            this.picDst.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.picDst.Location = new System.Drawing.Point(464, 79);
+            this.picDst.Margin = new System.Windows.Forms.Padding(2);
+            this.picDst.Name = "picDst";
+            this.picDst.Size = new System.Drawing.Size(451, 488);
+            this.picDst.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picDst.TabIndex = 2;
+            this.picDst.TabStop = false;
             // 
             // btnfindcorner
             // 
             this.btnfindcorner.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
             this.btnfindcorner.Location = new System.Drawing.Point(248, 46);
-            this.btnfindcorner.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnfindcorner.Margin = new System.Windows.Forms.Padding(2);
             this.btnfindcorner.Name = "btnfindcorner";
             this.btnfindcorner.Size = new System.Drawing.Size(80, 25);
             this.btnfindcorner.TabIndex = 1;
             this.btnfindcorner.Text = "FindCorner";
             this.btnfindcorner.UseVisualStyleBackColor = true;
-            this.btnfindcorner.Click += new System.EventHandler(this.btnfindcorner_Click);
+            this.btnfindcorner.Click += new System.EventHandler(this.btnFindcorner_Click);
             // 
             // setwidth
             // 
             this.setwidth.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.setwidth.Location = new System.Drawing.Point(344, 40);
-            this.setwidth.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.setwidth.Margin = new System.Windows.Forms.Padding(2);
             this.setwidth.Minimum = new decimal(new int[] {
             3,
             0,
@@ -161,7 +161,7 @@
             // 
             this.setheight.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.setheight.Location = new System.Drawing.Point(442, 40);
-            this.setheight.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.setheight.Margin = new System.Windows.Forms.Padding(2);
             this.setheight.Minimum = new decimal(new int[] {
             3,
             0,
@@ -203,13 +203,13 @@
             // 
             this.btngetmatrix.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.btngetmatrix.Location = new System.Drawing.Point(530, 21);
-            this.btngetmatrix.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btngetmatrix.Margin = new System.Windows.Forms.Padding(2);
             this.btngetmatrix.Name = "btngetmatrix";
             this.btngetmatrix.Size = new System.Drawing.Size(80, 46);
             this.btngetmatrix.TabIndex = 1;
             this.btngetmatrix.Text = "GetMatrix";
             this.btngetmatrix.UseVisualStyleBackColor = true;
-            this.btngetmatrix.Click += new System.EventHandler(this.btngetmatrix_Click);
+            this.btngetmatrix.Click += new System.EventHandler(this.btnGetmatrix_Click);
             // 
             // label4
             // 
@@ -395,13 +395,13 @@
             // 
             this.btnundistortion.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
             this.btnundistortion.Location = new System.Drawing.Point(806, 20);
-            this.btnundistortion.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnundistortion.Margin = new System.Windows.Forms.Padding(2);
             this.btnundistortion.Name = "btnundistortion";
             this.btnundistortion.Size = new System.Drawing.Size(100, 46);
             this.btnundistortion.TabIndex = 1;
             this.btnundistortion.Text = "Undistortion";
             this.btnundistortion.UseVisualStyleBackColor = true;
-            this.btnundistortion.Click += new System.EventHandler(this.btnundistortion_Click);
+            this.btnundistortion.Click += new System.EventHandler(this.btnUndistortion_Click);
             // 
             // label3
             // 
@@ -707,8 +707,8 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.setheight);
             this.Controls.Add(this.setwidth);
-            this.Controls.Add(this.dstpic);
-            this.Controls.Add(this.srcpic);
+            this.Controls.Add(this.picDst);
+            this.Controls.Add(this.picSrc);
             this.Controls.Add(this.btnundistortion);
             this.Controls.Add(this.btnLoadMat);
             this.Controls.Add(this.btnSaveMat);
@@ -720,12 +720,12 @@
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label3);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "CameraCalibrationView";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.srcpic)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dstpic)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picSrc)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picDst)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.setwidth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.setheight)).EndInit();
             this.ResumeLayout(false);
@@ -737,8 +737,8 @@
 
         private System.Windows.Forms.TextBox filepath;
         private System.Windows.Forms.Button btnbrowse;
-        private System.Windows.Forms.PictureBox srcpic;
-        private System.Windows.Forms.PictureBox dstpic;
+        private System.Windows.Forms.PictureBox picSrc;
+        private System.Windows.Forms.PictureBox picDst;
         private System.Windows.Forms.Button btnfindcorner;
         private System.Windows.Forms.NumericUpDown setwidth;
         private System.Windows.Forms.NumericUpDown setheight;
