@@ -13,6 +13,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Emgu.CV.CvEnum;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace EMD
 {
@@ -144,33 +145,56 @@ namespace EMD
 
         private static double earthMoverDistance(float[] hist1, float[] hist2, int binSize)
         {
+            //Matrix<float> signature1 = new Matrix<float>(4, 4, 1);
+            //Matrix<float> signature2 = new Matrix<float>(3, 4, 1);
+
+            //signature1.Data[0, 0] = 0.4f;
+            //signature1.Data[0, 1] = 100;
+            //signature1.Data[0, 2] = 40;
+            //signature1.Data[0, 3] = 22;
+            //signature1.Data[1, 0] = 0.3f;
+            //signature1.Data[1, 1] = 211;
+            //signature1.Data[1, 2] = 20;
+            //signature1.Data[1, 3] = 2;
+            //signature1.Data[2, 0] = 0.2f;
+            //signature1.Data[2, 1] = 32;
+            //signature1.Data[2, 2] = 190;
+            //signature1.Data[2, 3] = 150;
+            //signature1.Data[3, 0] = 0.1f;
+            //signature1.Data[3, 1] = 2;
+            //signature1.Data[3, 2] = 100;
+            //signature1.Data[3, 3] = 100;
+
+            //signature2.Data[0, 0] = 0.5f;
+            //signature2.Data[0, 1] = 0;
+            //signature2.Data[0, 2] = 0;
+            //signature2.Data[0, 3] = 0;
+            //signature2.Data[1, 0] = 0.3f;
+            //signature2.Data[1, 1] = 50;
+            //signature2.Data[1, 2] = 100;
+            //signature2.Data[1, 3] = 80;
+            //signature2.Data[2, 0] = 0.2f;
+            //signature2.Data[2, 1] = 255;
+            //signature2.Data[2, 2] = 255;
+            //signature2.Data[2, 3] = 255;
+
             Matrix<float> signature1 = new Matrix<float>(binSize, 2, 1);
             Matrix<float> signature2 = new Matrix<float>(binSize, 2, 1);
 
             for (int i = 0; i < binSize; i++)
             {
-                signature1.Data[i, 0] = hist1[i];
+                // weight
+                signature1.Data[i, 0] = hist1[i] / binSize / BinSize;
+                // feature
                 signature1.Data[i, 1] = i;
 
-                signature2.Data[i, 0] = hist2[i];
+                // weight
+                signature2.Data[i, 0] = hist2[i] / BinSize / binSize;
+                // feature
                 signature2.Data[i, 1] = i;
             }
 
-            //for (int r = 0; r < histHeight; r++)
-            //{
-            //    for (int c = 0; c < histWidth; c++)
-            //    {
-            //        //matHist1;
-            //        signature1.Data[r * histWidth + c, 0] = hist1.Data[r, c, 0] / 255;
-            //        signature1.Data[r * histWidth + c, 1] = r;
-            //        signature1.Data[r * histWidth + c, 2] = c;
-
-            //        //matHist2;
-            //        signature2.Data[r * histWidth + c, 0] = hist2.Data[r, c, 0] / 255;
-            //        signature2.Data[r * histWidth + c, 1] = r;
-            //        signature2.Data[r * histWidth + c, 2] = c;
-            //    }
-            //}
+            //write2file(hist1, hist2);
 
             double emd = CvInvoke.EMD(signature1, signature2, DistType.L2);
             return emd;
@@ -215,8 +239,8 @@ namespace EMD
             double intersection = CvInvoke.CompareHist(HistImg1, HistImg2, HistogramCompMethod.Intersect);
             double bhattach = CvInvoke.CompareHist(HistImg1, HistImg2, HistogramCompMethod.Bhattacharyya);
             double chisqralt = CvInvoke.CompareHist(HistImg1, HistImg2, HistogramCompMethod.ChisqrAlt);
-            //double emd = 0;
             double emd = earthMoverDistance(HistValF1, HistValF2, BinSize);
+            //double emd = 0;
 
             lblCorrel.Text = "Correlation: " + correl.ToString();
             lblChisqr.Text = "Chi-Square: " + chisqr.ToString();
@@ -224,6 +248,81 @@ namespace EMD
             lblBhattacharyya.Text = "Bhattacharyya: " + bhattach.ToString();
             lblChisqrAlt.Text = "Alternative Chi-Square: " + chisqralt.ToString();
             lblEMD.Text = "EMD: " + emd.ToString();
+        }
+
+
+        private static void write2file(float[] data1, float[] data2)
+        {
+            FileStream file = new FileStream("data.txt", FileMode.Create, FileAccess.Write);
+            StreamWriter stream = new StreamWriter(file, Encoding.UTF8);
+
+            // gray value of hist1
+            stream.Write("{ ");
+            for (int i = 0; i < data1.Length; i++)
+            {
+                stream.Write(data1[i]);
+                if (i != data1.Length - 1)
+                {
+                    stream.Write(", ");
+                }
+                else
+                {
+                    stream.Write(" ");
+                }
+            }
+            stream.WriteLine("}\n");
+
+            // index of hist1
+            stream.Write("{ ");
+            for (int i = 0; i < data1.Length; i++)
+            {
+                stream.Write(i);
+                if (i != data1.Length - 1)
+                {
+                    stream.Write(", ");
+                }
+                else
+                {
+                    stream.Write(" ");
+                }
+            }
+            stream.WriteLine("}\n");
+
+            // gray value of hist2
+            stream.Write("{ ");
+            for (int i = 0; i < data2.Length; i++)
+            {
+                stream.Write(data2[i]);
+                if (i != data2.Length - 1)
+                {
+                    stream.Write(", ");
+                }
+                else
+                {
+                    stream.Write(" ");
+                }
+            }
+            stream.WriteLine("}\n");
+
+            // index of hist2
+            stream.Write("{ ");
+            for (int i = 0; i < data2.Length; i++)
+            {
+                stream.Write(i);
+                if (i != data2.Length - 1)
+                {
+                    stream.Write(", ");
+                }
+                else
+                {
+                    stream.Write(" ");
+                }
+            }
+            stream.WriteLine("}\n");
+
+            stream.Close();
+            file.Close();
+
         }
     }
 }
