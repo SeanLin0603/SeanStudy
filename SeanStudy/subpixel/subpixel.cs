@@ -35,8 +35,64 @@ namespace subpixel
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     var inputImage = new Image<Gray, byte>(ofd.FileName);
-                    subPix(inputImage, 1);
-                    //CvInvoke.Imshow("inputImage", inputImage);
+
+                    Image<Gray, byte> canny = inputImage.Canny(140, 128);
+                    CvInvoke.Imshow("canny", canny);
+
+                    List<Contour> subContours;
+                    subPix(inputImage, canny, 3, out subContours);
+
+                    int scale = 6;
+                    //Image<Bgra, byte> drawImg = image.Convert<Bgra, byte>();
+                    Image<Bgra, byte> drawImg = inputImage.Resize(scale, Inter.Nearest).Convert<Bgra, byte>();
+
+                    // find the biggest contour
+                    int contourIdx = -1;
+                    int contourSize = -1;
+                    for (int i = 0; i < subContours.Capacity; i++)
+                    {
+                        int size = subContours[i].points.Length;
+                        if (size > contourSize)
+                        {
+                            contourIdx = i;
+                            contourSize = size;
+                        }
+                    }
+
+                    // Draw
+                    for (int i = 0; i < canny.Rows; i++)
+                    {
+                        for (int j = 0; j < canny.Cols; j++)
+                        {
+                            byte value = canny.Data[i, j, 0];
+                            if (value > 100)
+                            {
+                                // white edge
+                                int r = i * scale;
+                                int c = j * scale;
+
+                                drawImg.Data[r, c, 0] = 0;
+                                drawImg.Data[r, c, 1] = 255;
+                                drawImg.Data[r, c, 2] = 0;
+                            }
+                        }
+                    }
+
+                    PointF[] biggestContourPoints = subContours[contourIdx].points;
+                    for (int i = 0; i < biggestContourPoints.Length; i++)
+                    {
+                        PointF pt = biggestContourPoints[i];
+                        int r = (int)pt.Y * scale;
+                        int c = (int)pt.X * scale;
+
+                        drawImg.Data[r, c, 0] = 0;
+                        drawImg.Data[r, c, 1] = 0;
+                        drawImg.Data[r, c, 2] = 255;
+                    }
+
+                    CvInvoke.Imshow("drawImg", drawImg);
+                    CvInvoke.Imwrite(".\\subpix.png", drawImg);
+
                 }
             }
         }
@@ -47,20 +103,19 @@ namespace subpixel
             int ksize = 2 * r + 1;
             kx = new Image<Gray, int>(1, ksize);
             ky = new Image<Gray, int>(ksize, 1);
-            double[] kerF = new double[ksize];
+            float[] kerF = new float[ksize];
 
-            kerF[r] = 0.0d;
-            double sum = 0.0d;
+            kerF[r] = 0.0f;
+            float sum = 0.0f;
             for (int x = 1; x <= r; x++)
             {
-                double value = (-x * Math.Exp(-x * x / (2 * alpha * alpha)));
+                float value = (float)(-x * Math.Exp(-x * x / (2 * alpha * alpha)));
                 sum += value;
                 kerF[r + x] = value;
                 kerF[r - x] = value * -1;
             }
-            double scale = 128 / sum;
 
-
+            float scale = 128 / sum;
             for (int i = 0; i < ksize; i++)
             {
                 kerF[i] *= scale;
@@ -208,7 +263,6 @@ namespace subpixel
             int h = dx.Rows;
             result = new List<Contour>(contours.Size);
 
-
             for (int i = 0; i < contours.Size; i++)
             {
                 Contour tmp = new Contour();
@@ -259,7 +313,7 @@ namespace subpixel
             return true;
         }
 
-        private static void subPix(Image<Gray, byte> image, double alpha)
+        private static void subPix(Image<Gray, byte> image, Image<Gray, byte> canny, double alpha, out List<Contour> subContours)
         {
             Image<Gray, byte> blur = image.Clone();
             Size kernel = new Size(0, 0);
@@ -274,49 +328,17 @@ namespace subpixel
             Image<Gray, byte> dy = image.CopyBlank();
             CvInvoke.Filter2D(image, dx, kx, new Point(-1, -1), 0, BorderType.Constant);
             CvInvoke.Filter2D(image, dy, ky, new Point(-1, -1), 0, BorderType.Constant);
-            CvInvoke.Imshow("image", image);
             CvInvoke.Imshow("dx", dx);
             CvInvoke.Imshow("dy", dy);
 
-            Image<Gray, byte> canny = image.Canny(140, 128);
-            CvInvoke.Imshow("canny", canny);
 
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
             {
-                Image<Bgra, byte> drawImg = image.Convert<Bgra, byte>();
-
                 CvInvoke.FindContours(canny, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
                 //Image<Bgra, byte> contour = canny.Convert<Bgra, byte>();
                 //CvInvoke.DrawContours(contour, contours, 0, new MCvScalar(0, 0, 255));
                 //CvInvoke.Imshow("contour", contour);
-                List<Contour> subContours = new List<Contour>();
                 extractSubPixPoints(dx, dy, contours, out subContours);
-
-                // find the biggest contour
-                int contourIdx = -1;
-                int contourSize = -1;
-                for (int i = 0; i < subContours.Capacity; i++)
-                {
-                    int size = subContours[i].points.Length;
-                    if (size > contourSize)
-                    {
-                        contourIdx = i;
-                        contourSize = size;
-                    }
-                }
-
-                PointF[] biggestContourPoints = subContours[contourIdx].points;
-                for (int i = 0; i < biggestContourPoints.Length; i++)
-                {
-                    PointF pt = biggestContourPoints[i];
-                    drawImg.Data[(int)pt.Y, (int)pt.X, 0] = 0;
-                    drawImg.Data[(int)pt.Y, (int)pt.X, 1] = 0;
-                    drawImg.Data[(int)pt.Y, (int)pt.X, 2] = 255;
-                }
-                CvInvoke.Imshow("drawImg", drawImg);
-
-
-
             }
 
         }
