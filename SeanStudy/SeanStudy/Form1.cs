@@ -29,109 +29,70 @@ namespace SeanStudy
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    Stopwatch sw = new Stopwatch();
                     var inputImage = new Image<Gray, byte>(ofd.FileName);
-                    inputImage = inputImage.ThresholdBinary(new Gray(127), new Gray(255));
+                    var threSrc = inputImage.ThresholdBinary(new Gray(115), new Gray(255));
+                    CvInvoke.Imshow("threSrc", threSrc);
 
-                    MeasureAngle.Parameter parameter = new MeasureAngle.Parameter();
-                    parameter.ROI1 = new ROIOption(ROIOption.ROIType.SpecROI);
-                    parameter.ROI1.SpecROI = SpecROI.NewLeftTopModeROI(55, 25, 200, 120);
-                    parameter.ROI2 = new ROIOption(ROIOption.ROIType.SpecROI);
-                    parameter.ROI2.SpecROI = SpecROI.NewLeftTopModeROI(255, 140, 135, 220);
-                    parameter.AnglePoint = new Point(315, 75);
+                    Image<Gray, float> harris = new Image<Gray, float>(inputImage.Size);
+                    CvInvoke.CornerHarris(threSrc.Convert<Gray, byte>(), harris, 2); 
+                    CvInvoke.Normalize(harris, harris, 0, 255, NormType.MinMax, DepthType.Cv32F);
+                    double min = 0, max = 0;
+                    Point minp = new Point(0, 0);
+                    Point maxp = new Point(0, 0);
+                    CvInvoke.MinMaxLoc(harris, ref min, ref max, ref minp, ref maxp);
 
-                    MeasureAngle.Result result = new MeasureAngle.Result(0);
-                    sw.Start();
-                    FindRowCol(inputImage, parameter, out result);
-                    sw.Stop();
+                    var cornerThres = harris.ThresholdBinary(new Gray(51), new Gray(255));
+                    var cornerMap = cornerThres.Convert<Gray, byte>();
+                    List<Point> points = new List<Point>();
 
-                    TimeSpan time = sw.Elapsed;
-                    Console.WriteLine(time.TotalMilliseconds.ToString() + "ms");
+                    var rgbSrc = inputImage.Convert<Bgra, byte>();
+                    for (int h = 0; h < cornerMap.Height; h++)
+                    {
+                        for (int w = 0; w < cornerMap.Width; w++)
+                        {
+                            if (cornerMap[h, w].Intensity > 0)
+                            {
+                                CircleF circle = new CircleF(new PointF(w, h), 1);
+                                rgbSrc.Draw(circle, new Bgra(0, 0, 255, 255), 1);
+                                points.Add(new Point(w, h));
+                            }
+                        }
+                    }
+
+                    CvInvoke.Imshow("cornerMap", rgbSrc);
+
+                    //PointF[] src = new PointF[4];
+                    //PointF[] dst = new PointF[4];
+
+                    //src[0] = new PointF(55, 72);
+                    //src[1] = new PointF(418, 75);
+                    //src[2] = new PointF(410, 266);
+                    //src[3] = new PointF(176, 382);
+
+                    //dst[0] = new PointF(55, 72);
+                    //dst[1] = new PointF(418, 72);
+                    //dst[2] = new PointF(418, 405);
+                    //dst[3] = new PointF(55, 405);
+
+                    //Mat homo = new Mat();
+                    //Mat perspective = new Mat();
+                    //Mat warpAffine = new Mat();
+
+                    //CvInvoke.FindHomography(src, dst, homo, HomographyMethod.Ransac);
+                    //perspective = CvInvoke.GetPerspectiveTransform(src, dst);
+                    //warpAffine = CvInvoke.GetAffineTransform(src, dst);
+
+                    //Image<Gray, double> homoImg = homo.ToImage<Gray, double>();
+                    //Image<Gray, double> perspectiveImg = perspective.ToImage<Gray, double>();
+                    //Image<Gray, double> warpAffineImg = warpAffine.ToImage<Gray, double>();
+
+                    //CvInvoke.WarpPerspective(inputImage, outputImage, homo, outputImage.Size);
+                    //CvInvoke.Imshow("homo", outputImage);
+                    //CvInvoke.Imwrite("homo.png", outputImage);
+
+
                 }
             }
-        }
-
-        public static bool FindRowCol(Image<Gray, byte> image, MeasureAngle.Parameter parameter, out MeasureAngle.Result result)
-        {
-            var img1 = ROIOption.GetImage(image, parameter.ROI1);
-            var img2 = ROIOption.GetImage(image, parameter.ROI2);
-
-            int row = horizontalProjection(img1);
-            int col = verticalProjection(img2);
-
-            List<Point> rowLinePts = new List<Point>();
-            Point firstPt = new Point(0, row);
-            Point lastPt = new Point(parameter.ROI1.SpecROI.Width - 1, row);
-            firstPt = ROIOption.GetOriginPoint(image.Size, firstPt, parameter.ROI1);
-            lastPt = ROIOption.GetOriginPoint(image.Size, lastPt, parameter.ROI1);
-            rowLinePts.Add(firstPt);
-            rowLinePts.Add(lastPt);
-
-
-            List<Point> colLinePts = new List<Point>();
-            firstPt = new Point(col, 0);
-            lastPt = new Point(col, parameter.ROI2.SpecROI.Height - 1);
-            firstPt = ROIOption.GetOriginPoint(image.Size, firstPt, parameter.ROI2);
-            lastPt = ROIOption.GetOriginPoint(image.Size, lastPt, parameter.ROI2);
-            colLinePts.Add(firstPt);
-            colLinePts.Add(lastPt);
-
-            result = new MeasureAngle.Result(0);
-            if (MeasureAngle.Find(rowLinePts, colLinePts, parameter.AnglePoint, out result))
-            {
-                #region [DEBUG] Draw
-                var imgBGRA = image.Convert<Bgra, byte>();
-                // draw horizontal line
-                LineSegment2D rowLine = new LineSegment2D(result.ROI1Points[0], result.ROI1Points[result.ROI1Points.Count - 1]);
-                imgBGRA.Draw(rowLine, new Bgra(0, 0, 255, 255), 1);
-
-                // draw vertical line
-                LineSegment2D colLine = new LineSegment2D(result.ROI2Points[0], result.ROI2Points[result.ROI2Points.Count - 1]);
-                imgBGRA.Draw(colLine, new Bgra(0, 255, 0, 255), 1);
-
-                CvInvoke.PutText(imgBGRA, result.Angle.ToString(), parameter.AnglePoint, FontFace.HersheyComplex, 1, new MCvScalar(255, 0, 0, 255));
-                CvInvoke.Imshow("imgBGRA", imgBGRA);
-                #endregion
-
-                return true;
-            }
-            return false;
-        }
-
-        private static int verticalProjection(Image<Gray, byte> image)
-        {
-            // vertical projection
-            int width = image.Width;
-            int height = image.Height;
-            int maxCol = 0;
-
-            // reduce to a single column by sum
-            Mat mat = new Mat();
-            CvInvoke.Reduce(image, mat, ReduceDimension.SingleRow, ReduceType.ReduceSum, DepthType.Cv32S);
-            int[] projSums = new int[width];
-            System.Runtime.InteropServices.Marshal.Copy(mat.DataPointer, projSums, 0, width);
-            int minVal = projSums.Min();
-            maxCol = projSums.ToList().IndexOf(minVal);
-
-            return maxCol;
-        }
-
-        private static int horizontalProjection(Image<Gray, byte> image)
-        {
-            // horizontal projection
-            int width = image.Width;
-            int height = image.Height;
-            int maxRow = 0;
-
-            // reduce to a single column by sum
-            Mat mat = new Mat();
-            CvInvoke.Reduce(image, mat, ReduceDimension.SingleCol, ReduceType.ReduceSum, DepthType.Cv32S);
-            int[] projSums = new int[height];
-            System.Runtime.InteropServices.Marshal.Copy(mat.DataPointer, projSums, 0, height);
-            int minVal = projSums.Min();
-            maxRow = projSums.ToList().IndexOf(minVal);
-
-            return maxRow;
         }
 
     }
