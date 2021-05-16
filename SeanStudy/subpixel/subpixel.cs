@@ -43,14 +43,14 @@ namespace subpixel
                     //var cropImage = ROIOption.GetImage(inputImage, roi);
 
 
-                    Size kernel = new Size(3, 3);
-                    var gaussian = inputImage.CopyBlank();
-                    CvInvoke.GaussianBlur(inputImage, gaussian, kernel, 3);
-                    var mask = inputImage - gaussian;
-                    mask *= 2;
+                    //Size kernel = new Size(3, 3);
+                    //var gaussian = inputImage.CopyBlank();
+                    //CvInvoke.GaussianBlur(inputImage, gaussian, kernel, 3);
+                    //var mask = inputImage - gaussian;
+                    //mask *= 2;
 
-                    inputImage += mask;
-                    CvInvoke.Imshow("Sharpen", inputImage);
+                    //inputImage += mask;
+                    //CvInvoke.Imshow("Sharpen", inputImage);
 
 
                     doSubPix(inputImage);
@@ -67,7 +67,7 @@ namespace subpixel
             List<Contour> subContours;
             SubPixel(image, canny, 3.0, out foundContours, out subContours);
 
-            int scale = 11;
+            int scale = 1;
             Image<Bgra, byte> drawImg = image.Resize(scale, Inter.Nearest).Convert<Bgra, byte>();
 
             // find the biggest contour
