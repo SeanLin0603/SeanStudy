@@ -33,26 +33,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Corex.Core">
-      <HintPath>..\lib\Corex.Core.dll</HintPath>
+    <Reference Include="Emgu.CV, Version=3.0.0.2157, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Emgu300\Emgu.CV.dll</HintPath>
     </Reference>
-    <Reference Include="Corex.UI">
-      <HintPath>..\lib\Corex.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Corex.Vision">
-      <HintPath>..\lib\Corex.Vision.dll</HintPath>
-    </Reference>
-    <Reference Include="Corex.VisionLib">
-      <HintPath>..\lib\Corex.VisionLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Emgu.CV">
-      <HintPath>..\lib\Emgu.CV.dll</HintPath>
-    </Reference>
-    <Reference Include="Emgu.CV.UI">
-      <HintPath>..\lib\Emgu.CV.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Emgu.Util">
-      <HintPath>..\lib\Emgu.Util.dll</HintPath>
+    <Reference Include="Emgu.Util, Version=3.0.0.2157, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Emgu300\Emgu.Util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
