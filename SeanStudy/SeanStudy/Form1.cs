@@ -9,9 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Corex.VisionLib.Algorithm;
-using Corex.VisionLib;
-using System.Diagnostics;
+//using Corex.VisionLib.Algorithm;
+//using Corex.VisionLib;
 using Emgu.CV.CvEnum;
 
 namespace SeanStudy
