@@ -119,16 +119,18 @@ namespace subpixel
                 int r = pt.Y * scale + scale / 2;
                 int c = pt.X * scale + scale / 2;
 
+                // green means contour points
                 drawImg.Data[r, c, 0] = 0;
                 drawImg.Data[r, c, 1] = 255;
                 drawImg.Data[r, c, 2] = 0;
             }
             centerX = centerX / contour.Size * scale;
             centerY = centerY / contour.Size * scale;
-            drawImg.Data[(int)centerY, (int)centerX, 0] = 0;
+            // cyan means average point
+            drawImg.Data[(int)centerY, (int)centerX, 0] = 255;
             drawImg.Data[(int)centerY, (int)centerX, 1] = 255;
-            drawImg.Data[(int)centerY, (int)centerX, 2] = 255;
-            CvInvoke.Imwrite(".\\subpix_FindContour.png", drawImg);
+            drawImg.Data[(int)centerY, (int)centerX, 2] = 0;
+            CvInvoke.Imwrite("subpix_FindContour.png", drawImg);
 
             centerX = 0;
             centerY = 0;
@@ -143,18 +145,20 @@ namespace subpixel
                 int r = (int)(pt.Y * scale + scale / 2);
                 int c = (int)(pt.X * scale + scale / 2);
 
+                // red means subpix points
                 drawImg.Data[r, c, 0] = 0;
                 drawImg.Data[r, c, 1] = 0;
                 drawImg.Data[r, c, 2] = 255;
             }
             centerX = centerX / contour.Size * scale;
             centerY = centerY / contour.Size * scale;
-            drawImg.Data[(int)centerY, (int)centerX, 0] = 255;
+            // yellow means average point
+            drawImg.Data[(int)centerY, (int)centerX, 0] = 0;
             drawImg.Data[(int)centerY, (int)centerX, 1] = 255;
             drawImg.Data[(int)centerY, (int)centerX, 2] = 255;
 
+            CvInvoke.Imwrite("subpix.png", drawImg);
             CvInvoke.Imshow("drawImg", drawImg);
-            CvInvoke.Imwrite(".\\subpix.png", drawImg);
             return true;
         }
 
