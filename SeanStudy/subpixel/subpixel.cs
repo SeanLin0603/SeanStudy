@@ -48,18 +48,34 @@ namespace subpixel
                     //CvInvoke.GaussianBlur(inputImage, gaussian, kernel, 3);
                     //var mask = inputImage - gaussian;
                     //mask *= 2;
-
                     //inputImage += mask;
                     //CvInvoke.Imshow("Sharpen", inputImage);
 
+                    picSrc.Image = inputImage.Bitmap;
+                    Image<Bgra, byte> result = new Image<Bgra, byte>(10, 10);
+                    PointF before = new PointF();
+                    PointF after = new PointF();
+                    PointF diff = new PointF();
 
-                    doSubPix(inputImage);
+                    doSubPix(inputImage, out result, out before, out after);
+                    diff.X = after.X - before.X;
+                    diff.Y = after.Y - before.Y;
+                    picDst.Image = result.Bitmap;
+
+                    lblSrcCenter.Text = "Center point of FindContour: " + before.ToString();
+                    lblDstCenter.Text = "Center point of SubPix: " + after.ToString();
+                    lblDiff.Text = "Difference: " + diff.ToString();
+
+
                 }
             }
         }
 
-        private static bool doSubPix(Image<Gray, byte> image)
+        private static bool doSubPix(Image<Gray, byte> image, out Image<Bgra, byte> result, out PointF before, out PointF after)
         {
+            before = new PointF();
+            after = new PointF();
+
             Image<Gray, byte> canny = image.Canny(300, 100);
             CvInvoke.Imshow("canny", canny);
 
@@ -68,7 +84,7 @@ namespace subpixel
             SubPixel(image, canny, 3.0, out foundContours, out subContours);
 
             int scale = 1;
-            Image<Bgra, byte> drawImg = image.Resize(scale, Inter.Nearest).Convert<Bgra, byte>();
+            result = image.Resize(scale, Inter.Nearest).Convert<Bgra, byte>();
 
             // find the biggest contour
             int contourIdx = -1;
@@ -120,17 +136,21 @@ namespace subpixel
                 int c = pt.X * scale + scale / 2;
 
                 // green means contour points
-                drawImg.Data[r, c, 0] = 0;
-                drawImg.Data[r, c, 1] = 255;
-                drawImg.Data[r, c, 2] = 0;
+                result.Data[r, c, 0] = 0;
+                result.Data[r, c, 1] = 255;
+                result.Data[r, c, 2] = 0;
             }
             centerX = centerX / contour.Size * scale;
             centerY = centerY / contour.Size * scale;
+
+            before.X = (float)centerX;
+            before.Y = (float)centerY;
+
             // cyan means average point
-            drawImg.Data[(int)centerY, (int)centerX, 0] = 255;
-            drawImg.Data[(int)centerY, (int)centerX, 1] = 255;
-            drawImg.Data[(int)centerY, (int)centerX, 2] = 0;
-            CvInvoke.Imwrite("subpix_FindContour.png", drawImg);
+            result.Data[(int)centerY, (int)centerX, 0] = 255;
+            result.Data[(int)centerY, (int)centerX, 1] = 255;
+            result.Data[(int)centerY, (int)centerX, 2] = 0;
+            CvInvoke.Imwrite("subpix_FindContour.png", result);
 
             centerX = 0;
             centerY = 0;
@@ -146,19 +166,24 @@ namespace subpixel
                 int c = (int)(pt.X * scale + scale / 2);
 
                 // red means subpix points
-                drawImg.Data[r, c, 0] = 0;
-                drawImg.Data[r, c, 1] = 0;
-                drawImg.Data[r, c, 2] = 255;
+                result.Data[r, c, 0] = 0;
+                result.Data[r, c, 1] = 0;
+                result.Data[r, c, 2] = 255;
             }
             centerX = centerX / contour.Size * scale;
             centerY = centerY / contour.Size * scale;
-            // yellow means average point
-            drawImg.Data[(int)centerY, (int)centerX, 0] = 0;
-            drawImg.Data[(int)centerY, (int)centerX, 1] = 255;
-            drawImg.Data[(int)centerY, (int)centerX, 2] = 255;
 
-            CvInvoke.Imwrite("subpix.png", drawImg);
-            CvInvoke.Imshow("drawImg", drawImg);
+            after.X = (float)centerX;
+            after.Y = (float)centerY;
+
+            // yellow means average point
+            result.Data[(int)centerY, (int)centerX, 0] = 0;
+            result.Data[(int)centerY, (int)centerX, 1] = 255;
+            result.Data[(int)centerY, (int)centerX, 2] = 255;
+
+
+            CvInvoke.Imwrite("subpix.png", result);
+            CvInvoke.Imshow("drawImg", result);
             return true;
         }
 
@@ -194,8 +219,8 @@ namespace subpixel
         private static double getAmplitude(Image<Gray, short> dx, Image<Gray, short> dy, int i, int j)
         {
             double dataX = dx.Data[i, j, 0];
-            double dataY = dx.Data[i, j, 0];
-            return Math.Sqrt(dataX * dataX + dataY + dataY);
+            double dataY = dy.Data[i, j, 0];
+            return Math.Sqrt(dataX * dataX + dataY * dataY);
         }
 
         private static double[] getMagNeighbourhood(Image<Gray, short> dx, Image<Gray, short> dy, Point point, int w, int h)
@@ -232,6 +257,9 @@ namespace subpixel
             return a;
         }
 
+        // Compute the eigenvalues and eigenvectors of the Hessian matrix given by
+        // dfdrr, dfdrc, and dfdcc, and sort them in descending order according to
+        // their absolute values.
         private static bool eigenvals(double[] a, out double[] eigval, out double[][] eigvec)
         {
             eigval = new double[2];
@@ -271,9 +299,10 @@ namespace subpixel
             n1 = c;
             n2 = -s;
 
-            /* If the absolute value of an eigenvalue is larger than the other, put that
-            eigenvalue into first position.  If both are of equal absolute value, put
-            the negative one first. */
+            // If the absolute value of an eigenvalue is larger than the other, put that
+            // eigenvalue into first position.If both are of equal absolute value, put
+            // the negative one first.
+
             if (Math.Abs(e1) > Math.Abs(e2))
             {
                 eigval[0] = e1;
