@@ -36,9 +36,16 @@ namespace subpixel
 
             public Parameter()
             {
-                Sigma = 3.0;
+                Sigma = 0.0;
                 Threshold_H = 300;
                 Threshold_L = 100;
+            }
+
+            public Parameter(double sigma, double high, double low)
+            {
+                Sigma = sigma;
+                Threshold_H = high;
+                Threshold_L = low;
             }
         }
 
@@ -76,13 +83,20 @@ namespace subpixel
 
         public bool DoSubPix(Image<Gray, byte> image)
         {
-            int scale = 1;
+            int scale = 11;
+
+            double sigma = double.Parse(txtSigma.Text);
+            double high = double.Parse(txtCannyH.Text);
+            double low = double.Parse(txtCannyL.Text);
+
             PointF noSubPixOfCenter = new PointF();
             PointF subPixOfCenter = new PointF();
-            Parameter parameter = new Parameter();
+            Parameter parameter = new Parameter(sigma, high, low);
             Result result = new Result();
 
             SubPixel(image, parameter, out result);
+            Image<Gray, byte> srcImage = image.Resize(scale, Inter.Nearest);
+            picSrc.Image = srcImage.Bitmap;
             Image<Bgra, byte> drawImage = image.Resize(scale, Inter.Nearest).Convert<Bgra, byte>();
             
             // find the biggest contour
@@ -147,7 +161,7 @@ namespace subpixel
             drawImage.Data[(int)subPixOfCenter.Y, (int)subPixOfCenter.X, 1] = 255;
             drawImage.Data[(int)subPixOfCenter.Y, (int)subPixOfCenter.X, 2] = 255;
             CvInvoke.Imwrite("withSubPix.png", drawImage);
-            CvInvoke.Imshow("drawImg", drawImage);
+            //CvInvoke.Imshow("drawImg", drawImage);
 
             picDst.Image = drawImage.Bitmap;
             PointF diff = new PointF(subPixOfCenter.X- noSubPixOfCenter.X, subPixOfCenter.Y - noSubPixOfCenter.Y);
@@ -389,6 +403,7 @@ namespace subpixel
             Image<Gray, byte> blur = image.CopyBlank();
             CvInvoke.GaussianBlur(image, blur, kernel, parameter.Sigma);
             Image<Gray, byte> cannyImg = blur.Canny(300, 100);
+            CvInvoke.Imwrite("CannyImg.png", cannyImg);
 
             // kernel
             Image<Gray, int> kx, ky;

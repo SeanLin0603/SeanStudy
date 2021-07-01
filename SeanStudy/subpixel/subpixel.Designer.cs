@@ -34,6 +34,12 @@
             this.lblSrcCenter = new System.Windows.Forms.Label();
             this.lblDstCenter = new System.Windows.Forms.Label();
             this.lblDiff = new System.Windows.Forms.Label();
+            this.txtSigma = new System.Windows.Forms.TextBox();
+            this.lblSigma = new System.Windows.Forms.Label();
+            this.lblCannyH = new System.Windows.Forms.Label();
+            this.txtCannyH = new System.Windows.Forms.TextBox();
+            this.lblCannyL = new System.Windows.Forms.Label();
+            this.txtCannyL = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.picSrc)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDst)).BeginInit();
             this.SuspendLayout();
@@ -54,7 +60,7 @@
             this.picSrc.Location = new System.Drawing.Point(26, 162);
             this.picSrc.Name = "picSrc";
             this.picSrc.Size = new System.Drawing.Size(300, 300);
-            this.picSrc.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.picSrc.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picSrc.TabIndex = 1;
             this.picSrc.TabStop = false;
             // 
@@ -64,7 +70,7 @@
             this.picDst.Location = new System.Drawing.Point(469, 162);
             this.picDst.Name = "picDst";
             this.picDst.Size = new System.Drawing.Size(300, 300);
-            this.picDst.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.picDst.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picDst.TabIndex = 1;
             this.picDst.TabStop = false;
             // 
@@ -95,11 +101,71 @@
             this.lblDiff.TabIndex = 2;
             this.lblDiff.Text = "Difference:";
             // 
+            // txtSigma
+            // 
+            this.txtSigma.Location = new System.Drawing.Point(226, 13);
+            this.txtSigma.Name = "txtSigma";
+            this.txtSigma.Size = new System.Drawing.Size(100, 22);
+            this.txtSigma.TabIndex = 3;
+            this.txtSigma.Text = "0.0";
+            this.txtSigma.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // lblSigma
+            // 
+            this.lblSigma.AutoSize = true;
+            this.lblSigma.Location = new System.Drawing.Point(156, 16);
+            this.lblSigma.Name = "lblSigma";
+            this.lblSigma.Size = new System.Drawing.Size(51, 17);
+            this.lblSigma.TabIndex = 4;
+            this.lblSigma.Text = "Sigma:";
+            // 
+            // lblCannyH
+            // 
+            this.lblCannyH.AutoSize = true;
+            this.lblCannyH.Location = new System.Drawing.Point(118, 52);
+            this.lblCannyH.Name = "lblCannyH";
+            this.lblCannyH.Size = new System.Drawing.Size(89, 17);
+            this.lblCannyH.TabIndex = 6;
+            this.lblCannyH.Text = "Canny_High:";
+            // 
+            // txtCannyH
+            // 
+            this.txtCannyH.Location = new System.Drawing.Point(226, 47);
+            this.txtCannyH.Name = "txtCannyH";
+            this.txtCannyH.Size = new System.Drawing.Size(100, 22);
+            this.txtCannyH.TabIndex = 5;
+            this.txtCannyH.Text = "300";
+            this.txtCannyH.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // lblCannyL
+            // 
+            this.lblCannyL.AutoSize = true;
+            this.lblCannyL.Location = new System.Drawing.Point(122, 86);
+            this.lblCannyL.Name = "lblCannyL";
+            this.lblCannyL.Size = new System.Drawing.Size(85, 17);
+            this.lblCannyL.TabIndex = 8;
+            this.lblCannyL.Text = "Canny_Low:";
+            // 
+            // txtCannyL
+            // 
+            this.txtCannyL.Location = new System.Drawing.Point(226, 86);
+            this.txtCannyL.Name = "txtCannyL";
+            this.txtCannyL.Size = new System.Drawing.Size(100, 22);
+            this.txtCannyL.TabIndex = 7;
+            this.txtCannyL.Text = "100";
+            this.txtCannyL.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // subpixel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(865, 527);
+            this.Controls.Add(this.lblCannyL);
+            this.Controls.Add(this.txtCannyL);
+            this.Controls.Add(this.lblCannyH);
+            this.Controls.Add(this.txtCannyH);
+            this.Controls.Add(this.lblSigma);
+            this.Controls.Add(this.txtSigma);
             this.Controls.Add(this.lblDiff);
             this.Controls.Add(this.lblDstCenter);
             this.Controls.Add(this.lblSrcCenter);
@@ -123,6 +189,12 @@
         private System.Windows.Forms.Label lblSrcCenter;
         private System.Windows.Forms.Label lblDstCenter;
         private System.Windows.Forms.Label lblDiff;
+        private System.Windows.Forms.TextBox txtSigma;
+        private System.Windows.Forms.Label lblSigma;
+        private System.Windows.Forms.Label lblCannyH;
+        private System.Windows.Forms.TextBox txtCannyH;
+        private System.Windows.Forms.Label lblCannyL;
+        private System.Windows.Forms.TextBox txtCannyL;
     }
 }
 
