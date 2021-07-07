@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeanStudy", "SeanStudy\Sean
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "subpixel", "subpixel\subpixel.csproj", "{9D42A235-0353-40AC-BBCE-8BBE8045211D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubPix2", "SubPix2\SubPix2.csproj", "{339D145B-4132-47AD-ACAE-56BF7285D3EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9D42A235-0353-40AC-BBCE-8BBE8045211D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D42A235-0353-40AC-BBCE-8BBE8045211D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D42A235-0353-40AC-BBCE-8BBE8045211D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{339D145B-4132-47AD-ACAE-56BF7285D3EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{339D145B-4132-47AD-ACAE-56BF7285D3EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{339D145B-4132-47AD-ACAE-56BF7285D3EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{339D145B-4132-47AD-ACAE-56BF7285D3EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
