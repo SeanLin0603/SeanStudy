@@ -83,11 +83,5 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\subpixel\subpixel.csproj">
-      <Project>{9d42a235-0353-40ac-bbce-8bbe8045211d}</Project>
-      <Name>subpixel</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
