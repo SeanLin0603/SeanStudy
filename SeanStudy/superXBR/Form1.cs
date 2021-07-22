@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Emgu.CV;
@@ -65,7 +58,16 @@ namespace superXBR
 
         private double clamp(double x, double floor, double ceil)
         {
-            return Math.Max(Math.Min(x, ceil), floor);
+            if (x > ceil)
+            {
+                x = ceil;
+            }
+            if (x < floor)
+            {
+                x = floor;
+            }
+            return x;
+            //return Math.Max(Math.Min(x, ceil), floor);
         }
 
         private int getMin(int a, int b, int c, int d)
@@ -127,17 +129,20 @@ namespace superXBR
             return (dw1 - dw2);
         }
 
-
-        static double wgt1 = 0.129633;
-        static double wgt2 = 0.129633;
-        static double w1 = -wgt1;
-        static double w2 = wgt1 + 0.5;
-        static double w3 = -wgt2;
-        static double w4 = wgt2 + 0.5;
-
         public bool SuperxBR(Image<Bgra, byte> image, int factor, out Image<Bgra, byte> result)
         {
-            result = new Image<Bgra, byte>(factor * image.Width, factor * image.Height);
+            double wgt1 = 0.129633;
+            double wgt2 = 0.129633;
+            double w1 = -wgt1;
+            double w2 = wgt1 + 0.5;
+            double w3 = -wgt2;
+            double w4 = wgt2 + 0.5;
+
+            int smallW = image.Width;
+            int smallH = image.Height;
+            int bigW = smallW * factor;
+            int bigH = smallH * factor;
+            result = new Image<Bgra, byte>(bigW, bigH);
 
             int[][] r = fourByfourIntMat();
             int[][] b = fourByfourIntMat();
@@ -155,9 +160,9 @@ namespace superXBR
 
             #region First Pass
             double[] wp = new double[] { 2.0, 1.0, -1.0, 4.0, -1.0, 1.0 };
-            for (int y = 0; y < result.Height; ++y)
+            for (int y = 0; y < bigH; ++y)
             {
-                for (int x = 0; x < result.Width; ++x)
+                for (int x = 0; x < bigW; ++x)
                 {
                     // central pixels on original images
                     int cx = x / factor;
@@ -169,8 +174,8 @@ namespace superXBR
                         for (int sy = -1; sy <= 2; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sy + cy, 0, image.Height - 1);
-                            int csx = (int)clamp(sx + cx, 0, image.Width - 1);
+                            int csy = (int)clamp(sy + cy, 0, smallH - 1);
+                            int csx = (int)clamp(sx + cx, 0, smallW - 1);
                             // sample & add weighted components
                             byte bSample = image.Data[csy, csx, 0];
                             byte gSample = image.Data[csy, csx, 1];
@@ -241,9 +246,9 @@ namespace superXBR
             wp[4] = 0.0;
             wp[5] = 0.0;
 
-            for (int y = 0; y < result.Height; ++y)
+            for (int y = 0; y < bigH; ++y)
             {
-                for (int x = 0; x < result.Width; ++x)
+                for (int x = 0; x < bigW; ++x)
                 {
                     // sample supporting pixels in original image
                     for (int sx = -1; sx <= 2; ++sx)
@@ -251,8 +256,8 @@ namespace superXBR
                         for (int sy = -1; sy <= 2; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sx - sy + y, 0, factor * image.Height - 1);
-                            int csx = (int)clamp(sx + sy + x, 0, factor * image.Width - 1);
+                            int csy = (int)clamp(sx - sy + y, 0, bigH - 1);
+                            int csx = (int)clamp(sx + sy + x, 0, bigW - 1);
                             // sample & add weighted components
                             byte bSample = result.Data[csy, csx, 0];
                             byte gSample = result.Data[csy, csx, 1];
@@ -310,8 +315,8 @@ namespace superXBR
                         for (int sy = -1; sy <= 2; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sx - sy + 1 + y, 0, factor * image.Height - 1);
-                            int csx = (int)clamp(sx + sy - 1 + x, 0, factor * image.Width - 1);
+                            int csy = (int)clamp(sx - sy + 1 + y, 0, bigH - 1);
+                            int csx = (int)clamp(sx + sy - 1 + x, 0, bigW - 1);
                             // sample & add weighted components
                             byte bSample = result.Data[csy, csx, 0];
                             byte gSample = result.Data[csy, csx, 1];
@@ -371,17 +376,17 @@ namespace superXBR
             wp[4] = -1.0;
             wp[5] = 1.0;
 
-            for (int y = result.Height - 1; y >= 0; --y)
+            for (int y = bigH - 1; y >= 0; --y)
             {
-                for (int x = result.Width - 1; x >= 0; --x)
+                for (int x = bigW - 1; x >= 0; --x)
                 {
                     for (int sx = -2; sx <= 1; ++sx)
                     {
                         for (int sy = -2; sy <= 1; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sy + y, 0, factor * image.Height - 1);
-                            int csx = (int)clamp(sx + x, 0, factor * image.Width - 1);
+                            int csy = (int)clamp(sy + y, 0, bigH - 1);
+                            int csx = (int)clamp(sx + x, 0, bigW - 1);
                             // sample & add weighted components
                             byte bSample = result.Data[csy, csx, 0];
                             byte gSample = result.Data[csy, csx, 1];
