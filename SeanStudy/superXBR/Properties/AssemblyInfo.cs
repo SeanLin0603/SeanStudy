@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("subpixel")]
+[assembly: AssemblyTitle("superXBR")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("subpixel")]
+[assembly: AssemblyProduct("superXBR")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9d42a235-0353-40ac-bbce-8bbe8045211d")]
+[assembly: Guid("44d5f6fd-21d6-4b6f-90da-f8fcf6a8ed0c")]
 
 // Version information for an assembly consists of the following four values:
 //

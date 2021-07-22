@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace subpixel.Properties
+namespace superXBR.Properties
 {
 
 

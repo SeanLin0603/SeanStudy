@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SubPix2
+namespace superXBR
 {
     static class Program
     {
         /// <summary>
-        /// 應用程式的主要進入點。
+        /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
