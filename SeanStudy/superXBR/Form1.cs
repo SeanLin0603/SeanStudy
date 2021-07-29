@@ -19,37 +19,44 @@ namespace superXBR
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    int scale = 4;
-
                     var inputImage = new Image<Bgra, byte>(ofd.FileName);
-                    Image<Bgra, byte> result = inputImage.Clone();
 
-                    Stopwatch sw = new Stopwatch();
-                    sw.Reset();
-                    sw.Start();
-                    SuperxBR(inputImage, scale, out result);
-                    sw.Stop();
-                    string timeXBR = sw.Elapsed.TotalMilliseconds.ToString();
+                    Matrix<int> matrix = new Matrix<int>(4, 4);
 
-                    sw.Reset();
-                    sw.Start();
-                    var resizeImg = inputImage.Resize(scale, Emgu.CV.CvEnum.Inter.Nearest);
-                    sw.Stop();
-                    string timeResize = sw.Elapsed.TotalMilliseconds.ToString();
-
-                    Console.WriteLine("Super-xBR takes :" + timeXBR + "ms");
-                    Console.WriteLine("OpenCV resize takes :" + timeResize + "ms");
-
-                    CvInvoke.Imshow("inputImage", inputImage);
-                    CvInvoke.Imshow("result", result);
-                    CvInvoke.Imwrite("result.png", result);
-
-                    CvInvoke.Imshow("resizeImg", resizeImg);
-                    CvInvoke.Imwrite("resizeImg.png", resizeImg);
-
+                    doing(inputImage);
                 }
             }
         }
+
+        private void doing(Image<Bgra, byte> image)
+        {
+            int scale = 8;
+
+            Image<Bgra, byte> result = image.Clone();
+            Stopwatch sw = new Stopwatch();
+            sw.Reset();
+            sw.Start();
+            SuperxBR(image, scale, out result);
+            sw.Stop();
+            string timeXBR = sw.Elapsed.TotalMilliseconds.ToString();
+
+            sw.Reset();
+            sw.Start();
+            var resizeImg = image.Resize(scale, Emgu.CV.CvEnum.Inter.Lanczos4);
+            sw.Stop();
+            string timeResize = sw.Elapsed.TotalMilliseconds.ToString();
+
+            Console.WriteLine("Super-xBR takes :" + timeXBR + "ms");
+            Console.WriteLine("OpenCV resize takes :" + timeResize + "ms");
+
+            CvInvoke.Imshow("inputImage", image);
+            CvInvoke.Imshow("result", result);
+            CvInvoke.Imwrite("result.png", result);
+
+            CvInvoke.Imshow("resizeImg", resizeImg);
+            CvInvoke.Imwrite("resizeImg.png", resizeImg);
+        }
+
 
         private double df(double a, double b)
         {
@@ -72,9 +79,14 @@ namespace superXBR
 
         private int getMin(int a, int b, int c, int d)
         {
-            int minVal = int.MaxValue;
-            if (a < minVal) minVal = a;
-            if (b < minVal) minVal = b;
+            //int minVal = int.MaxValue;
+            //if (a < minVal) minVal = a;
+            //if (b < minVal) minVal = b;
+            //if (c < minVal) minVal = c;
+            //if (d < minVal) minVal = d;
+
+            int minVal = a;
+            if (b < a) minVal = b;
             if (c < minVal) minVal = c;
             if (d < minVal) minVal = d;
             return minVal;
@@ -82,9 +94,14 @@ namespace superXBR
 
         private int getMax(int a, int b, int c, int d)
         {
-            int maxVal = int.MinValue;
-            if (a > maxVal) maxVal = a;
-            if (b > maxVal) maxVal = b;
+            //int maxVal = int.MinValue;
+            //if (a > maxVal) maxVal = a;
+            //if (b > maxVal) maxVal = b;
+            //if (c > maxVal) maxVal = c;
+            //if (d > maxVal) maxVal = d;
+
+            int maxVal = a;
+            if (b > a) maxVal = a;
             if (c > maxVal) maxVal = c;
             if (d > maxVal) maxVal = d;
             return maxVal;
@@ -158,6 +175,9 @@ namespace superXBR
             double min_b_sample, max_b_sample;
             double min_a_sample, max_a_sample;
 
+            byte[,,] imageData = image.Data;
+            byte[,,] resultData = result.Data;
+
             #region First Pass
             double[] wp = new double[] { 2.0, 1.0, -1.0, 4.0, -1.0, 1.0 };
             for (int y = 0; y < bigH; ++y)
@@ -177,10 +197,10 @@ namespace superXBR
                             int csy = (int)clamp(sy + cy, 0, smallH - 1);
                             int csx = (int)clamp(sx + cx, 0, smallW - 1);
                             // sample & add weighted components
-                            byte bSample = image.Data[csy, csx, 0];
-                            byte gSample = image.Data[csy, csx, 1];
-                            byte rSample = image.Data[csy, csx, 2];
-                            byte aSample = image.Data[csy, csx, 3];
+                            byte bSample = imageData[csy, csx, 0];
+                            byte gSample = imageData[csy, csx, 1];
+                            byte rSample = imageData[csy, csx, 2];
+                            byte aSample = imageData[csy, csx, 3];
 
                             r[sx + 1][sy + 1] = rSample;
                             g[sx + 1][sy + 1] = gSample;
@@ -189,14 +209,40 @@ namespace superXBR
                             Y[sx + 1][sy + 1] = (0.2126 * r[sx + 1][sy + 1] + 0.7152 * g[sx + 1][sy + 1] + 0.0722 * b[sx + 1][sy + 1]);
                         }
                     }
-                    min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
+
+                    int r11 = r[1][1];
+                    int r21 = r[1][1];
+                    int r12 = r[1][1];
+                    int r22 = r[1][1];
+                    int g11 = g[1][1];
+                    int g21 = g[2][1];
+                    int g12 = g[1][2];
+                    int g22 = g[2][2];
+                    int b11 = b[1][1];
+                    int b21 = b[2][1];
+                    int b12 = b[1][2];
+                    int b22 = b[2][2];
+                    int a11 = r[1][1];
+                    int a21 = r[2][1];
+                    int a12 = r[1][2];
+                    int a22 = r[2][2];
+
+                    min_r_sample = getMin(r11, r21, r12, r22);
+                    min_g_sample = getMin(g11, g21, g12, g22);
+                    min_b_sample = getMin(b11, b21, b12, b22);
+                    min_a_sample = getMin(a11, a21, a12, a22);
+                    max_r_sample = getMax(r11, r21, r12, r22);
+                    max_g_sample = getMax(g11, g21, g12, g22);
+                    max_b_sample = getMax(b11, b21, b12, b22);
+                    max_a_sample = getMax(a11, a21, a12, a22);
+                    //min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    //min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    //min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    //min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    //max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    //max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    //max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    //max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
                     d_edge = diagonal_edge(Y, wp);
 
                     if (d_edge <= 0)
@@ -222,20 +268,21 @@ namespace superXBR
                     gi = (byte)clamp(Math.Ceiling(gf), 0, 255);
                     bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
                     ai = (byte)clamp(Math.Ceiling(af), 0, 255);
-                    result.Data[y, x, 0] = result.Data[y, x + 1, 0] = result.Data[y + 1, x, 0] = image.Data[cy, cx, 0];
-                    result.Data[y, x, 1] = result.Data[y, x + 1, 1] = result.Data[y + 1, x, 1] = image.Data[cy, cx, 1];
-                    result.Data[y, x, 2] = result.Data[y, x + 1, 2] = result.Data[y + 1, x, 2] = image.Data[cy, cx, 2];
-                    result.Data[y, x, 3] = result.Data[y, x + 1, 3] = result.Data[y + 1, x, 3] = image.Data[cy, cx, 3];
-                    result.Data[y + 1, x + 1, 0] = bi;
-                    result.Data[y + 1, x + 1, 1] = gi;
-                    result.Data[y + 1, x + 1, 2] = ri;
-                    result.Data[y + 1, x + 1, 3] = ai;
+                    resultData[y, x, 0] = resultData[y, x + 1, 0] = resultData[y + 1, x, 0] = imageData[cy, cx, 0];
+                    resultData[y, x, 1] = resultData[y, x + 1, 1] = resultData[y + 1, x, 1] = imageData[cy, cx, 1];
+                    resultData[y, x, 2] = resultData[y, x + 1, 2] = resultData[y + 1, x, 2] = imageData[cy, cx, 2];
+                    resultData[y, x, 3] = resultData[y, x + 1, 3] = resultData[y + 1, x, 3] = imageData[cy, cx, 3];
+                    resultData[y + 1, x + 1, 0] = bi;
+                    resultData[y + 1, x + 1, 1] = gi;
+                    resultData[y + 1, x + 1, 2] = ri;
+                    resultData[y + 1, x + 1, 3] = ai;
                     ++x;
                 }
                 ++y;
             }
             #endregion
 
+            result.Data = resultData;
             CvInvoke.Imwrite("result1.png", result);
 
             #region Second Pass
@@ -259,10 +306,10 @@ namespace superXBR
                             int csy = (int)clamp(sx - sy + y, 0, bigH - 1);
                             int csx = (int)clamp(sx + sy + x, 0, bigW - 1);
                             // sample & add weighted components
-                            byte bSample = result.Data[csy, csx, 0];
-                            byte gSample = result.Data[csy, csx, 1];
-                            byte rSample = result.Data[csy, csx, 2];
-                            byte aSample = result.Data[csy, csx, 3];
+                            byte bSample = resultData[csy, csx, 0];
+                            byte gSample = resultData[csy, csx, 1];
+                            byte rSample = resultData[csy, csx, 2];
+                            byte aSample = resultData[csy, csx, 3];
 
                             r[sx + 1][sy + 1] = rSample;
                             g[sx + 1][sy + 1] = gSample;
@@ -272,14 +319,40 @@ namespace superXBR
                         }
                     }
 
-                    min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    int r11 = r[1][1];
+                    int r21 = r[1][1];
+                    int r12 = r[1][1];
+                    int r22 = r[1][1];
+                    int g11 = g[1][1];
+                    int g21 = g[2][1];
+                    int g12 = g[1][2];
+                    int g22 = g[2][2];
+                    int b11 = b[1][1];
+                    int b21 = b[2][1];
+                    int b12 = b[1][2];
+                    int b22 = b[2][2];
+                    int a11 = r[1][1];
+                    int a21 = r[2][1];
+                    int a12 = r[1][2];
+                    int a22 = r[2][2];
+
+                    //min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    //min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    //min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    //min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    //max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    //max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    //max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    //max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    min_r_sample = getMin(r11, r21, r12, r22);
+                    min_g_sample = getMin(g11, g21, g12, g22);
+                    min_b_sample = getMin(b11, b21, b12, b22);
+                    min_a_sample = getMin(a11, a21, a12, a22);
+                    max_r_sample = getMax(r11, r21, r12, r22);
+                    max_g_sample = getMax(g11, g21, g12, g22);
+                    max_b_sample = getMax(b11, b21, b12, b22);
+                    max_a_sample = getMax(a11, a21, a12, a22);
+
                     d_edge = diagonal_edge(Y, wp);
                     if (d_edge <= 0)
                     {
@@ -305,10 +378,10 @@ namespace superXBR
                     gi = (byte)clamp(Math.Ceiling(gf), 0, 255);
                     bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
                     ai = (byte)clamp(Math.Ceiling(af), 0, 255);
-                    result.Data[y, x + 1, 0] = bi;
-                    result.Data[y, x + 1, 1] = gi;
-                    result.Data[y, x + 1, 2] = ri;
-                    result.Data[y, x + 1, 3] = ai;
+                    resultData[y, x + 1, 0] = bi;
+                    resultData[y, x + 1, 1] = gi;
+                    resultData[y, x + 1, 2] = ri;
+                    resultData[y, x + 1, 3] = ai;
 
                     for (int sx = -1; sx <= 2; ++sx)
                     {
@@ -318,10 +391,10 @@ namespace superXBR
                             int csy = (int)clamp(sx - sy + 1 + y, 0, bigH - 1);
                             int csx = (int)clamp(sx + sy - 1 + x, 0, bigW - 1);
                             // sample & add weighted components
-                            byte bSample = result.Data[csy, csx, 0];
-                            byte gSample = result.Data[csy, csx, 1];
-                            byte rSample = result.Data[csy, csx, 2];
-                            byte aSample = result.Data[csy, csx, 3];
+                            byte bSample = resultData[csy, csx, 0];
+                            byte gSample = resultData[csy, csx, 1];
+                            byte rSample = resultData[csy, csx, 2];
+                            byte aSample = resultData[csy, csx, 3];
 
                             r[sx + 1][sy + 1] = rSample;
                             g[sx + 1][sy + 1] = gSample;
@@ -356,16 +429,17 @@ namespace superXBR
                     bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
                     ai = (byte)clamp(Math.Ceiling(af), 0, 255);
 
-                    result.Data[y + 1, x, 0] = bi;
-                    result.Data[y + 1, x, 1] = gi;
-                    result.Data[y + 1, x, 2] = ri;
-                    result.Data[y + 1, x, 3] = ai;
+                    resultData[y + 1, x, 0] = bi;
+                    resultData[y + 1, x, 1] = gi;
+                    resultData[y + 1, x, 2] = ri;
+                    resultData[y + 1, x, 3] = ai;
                     ++x;
                 }
                 ++y;
             }
             #endregion
 
+            result.Data = resultData;
             CvInvoke.Imwrite("result2.png", result);
 
             #region Third Pass
@@ -388,10 +462,10 @@ namespace superXBR
                             int csy = (int)clamp(sy + y, 0, bigH - 1);
                             int csx = (int)clamp(sx + x, 0, bigW - 1);
                             // sample & add weighted components
-                            byte bSample = result.Data[csy, csx, 0];
-                            byte gSample = result.Data[csy, csx, 1];
-                            byte rSample = result.Data[csy, csx, 2];
-                            byte aSample = result.Data[csy, csx, 3];
+                            byte bSample = resultData[csy, csx, 0];
+                            byte gSample = resultData[csy, csx, 1];
+                            byte rSample = resultData[csy, csx, 2];
+                            byte aSample = resultData[csy, csx, 3];
 
                             r[sx + 2][sy + 2] = rSample;
                             g[sx + 2][sy + 2] = gSample;
@@ -401,14 +475,39 @@ namespace superXBR
                         }
                     }
 
-                    min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    int r11 = r[1][1];
+                    int r21 = r[1][1];
+                    int r12 = r[1][1];
+                    int r22 = r[1][1];
+                    int g11 = g[1][1];
+                    int g21 = g[2][1];
+                    int g12 = g[1][2];
+                    int g22 = g[2][2];
+                    int b11 = b[1][1];
+                    int b21 = b[2][1];
+                    int b12 = b[1][2];
+                    int b22 = b[2][2];
+                    int a11 = r[1][1];
+                    int a21 = r[2][1];
+                    int a12 = r[1][2];
+                    int a22 = r[2][2];
+
+                    //min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    //min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    //min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    //min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    //max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    //max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    //max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    //max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    min_r_sample = getMin(r11, r21, r12, r22);
+                    min_g_sample = getMin(g11, g21, g12, g22);
+                    min_b_sample = getMin(b11, b21, b12, b22);
+                    min_a_sample = getMin(a11, a21, a12, a22);
+                    max_r_sample = getMax(r11, r21, r12, r22);
+                    max_g_sample = getMax(g11, g21, g12, g22);
+                    max_b_sample = getMax(b11, b21, b12, b22);
+                    max_a_sample = getMax(a11, a21, a12, a22);
                     d_edge = diagonal_edge(Y, wp);
                     if (d_edge <= 0)
                     {
@@ -435,14 +534,15 @@ namespace superXBR
                     bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
                     ai = (byte)clamp(Math.Ceiling(af), 0, 255);
 
-                    result.Data[y, x, 0] = bi;
-                    result.Data[y, x, 1] = gi;
-                    result.Data[y, x, 2] = ri;
-                    result.Data[y, x, 3] = ai;
+                    resultData[y, x, 0] = bi;
+                    resultData[y, x, 1] = gi;
+                    resultData[y, x, 2] = ri;
+                    resultData[y, x, 3] = ai;
                 }
             }
             #endregion
 
+            result.Data = resultData;
             return true;
         }
     }
