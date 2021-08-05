@@ -21,8 +21,6 @@ namespace superXBR
                 {
                     var inputImage = new Image<Bgra, byte>(ofd.FileName);
 
-                    Matrix<int> matrix = new Matrix<int>(4, 4);
-
                     doing(inputImage);
                 }
             }
@@ -30,7 +28,7 @@ namespace superXBR
 
         private void doing(Image<Bgra, byte> image)
         {
-            int scale = 8;
+            int scale = 2;
 
             Image<Bgra, byte> result = image.Clone();
             Stopwatch sw = new Stopwatch();
@@ -63,19 +61,19 @@ namespace superXBR
             return Math.Abs(a - b);
         }
 
-        private double clamp(double x, double floor, double ceil)
-        {
-            if (x > ceil)
-            {
-                x = ceil;
-            }
-            if (x < floor)
-            {
-                x = floor;
-            }
-            return x;
-            //return Math.Max(Math.Min(x, ceil), floor);
-        }
+        //private double clamp(double x, double floor, double ceil)
+        //{
+        //    if (x > ceil)
+        //    {
+        //        x = ceil;
+        //    }
+        //    if (x < floor)
+        //    {
+        //        x = floor;
+        //    }
+        //    return x;
+        //    //return Math.Max(Math.Min(x, ceil), floor);
+        //}
 
         private int getMin(int a, int b, int c, int d)
         {
@@ -148,6 +146,9 @@ namespace superXBR
 
         public bool SuperxBR(Image<Bgra, byte> image, int factor, out Image<Bgra, byte> result)
         {
+            byte minByte = 0;
+            byte maxByte = 255;
+
             double wgt1 = 0.129633;
             double wgt2 = 0.129633;
             double w1 = -wgt1;
@@ -178,6 +179,7 @@ namespace superXBR
             byte[,,] imageData = image.Data;
             byte[,,] resultData = result.Data;
 
+ 
             #region First Pass
             double[] wp = new double[] { 2.0, 1.0, -1.0, 4.0, -1.0, 1.0 };
             for (int y = 0; y < bigH; ++y)
@@ -194,8 +196,13 @@ namespace superXBR
                         for (int sy = -1; sy <= 2; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sy + cy, 0, smallH - 1);
-                            int csx = (int)clamp(sx + cx, 0, smallW - 1);
+                            int csy = sy + cy;
+                            int csx = sx + cx;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > smallH - 1) ? smallH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > smallW - 1) ? smallW - 1 : csx;
+
                             // sample & add weighted components
                             byte bSample = imageData[csy, csx, 0];
                             byte gSample = imageData[csy, csx, 1];
@@ -210,39 +217,40 @@ namespace superXBR
                         }
                     }
 
-                    int r11 = r[1][1];
-                    int r21 = r[1][1];
-                    int r12 = r[1][1];
-                    int r22 = r[1][1];
-                    int g11 = g[1][1];
-                    int g21 = g[2][1];
-                    int g12 = g[1][2];
-                    int g22 = g[2][2];
-                    int b11 = b[1][1];
-                    int b21 = b[2][1];
-                    int b12 = b[1][2];
-                    int b22 = b[2][2];
-                    int a11 = r[1][1];
-                    int a21 = r[2][1];
-                    int a12 = r[1][2];
-                    int a22 = r[2][2];
+                    //int r11 = r[1][1];
+                    //int r21 = r[1][1];
+                    //int r12 = r[1][1];
+                    //int r22 = r[1][1];
+                    //int g11 = g[1][1];
+                    //int g21 = g[2][1];
+                    //int g12 = g[1][2];
+                    //int g22 = g[2][2];
+                    //int b11 = b[1][1];
+                    //int b21 = b[2][1];
+                    //int b12 = b[1][2];
+                    //int b22 = b[2][2];
+                    //int a11 = r[1][1];
+                    //int a21 = r[2][1];
+                    //int a12 = r[1][2];
+                    //int a22 = r[2][2];
 
-                    min_r_sample = getMin(r11, r21, r12, r22);
-                    min_g_sample = getMin(g11, g21, g12, g22);
-                    min_b_sample = getMin(b11, b21, b12, b22);
-                    min_a_sample = getMin(a11, a21, a12, a22);
-                    max_r_sample = getMax(r11, r21, r12, r22);
-                    max_g_sample = getMax(g11, g21, g12, g22);
-                    max_b_sample = getMax(b11, b21, b12, b22);
-                    max_a_sample = getMax(a11, a21, a12, a22);
-                    //min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    //min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    //min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    //min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    //max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    //max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    //max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    //max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    //min_r_sample = getMin(r11, r21, r12, r22);
+                    //min_g_sample = getMin(g11, g21, g12, g22);
+                    //min_b_sample = getMin(b11, b21, b12, b22);
+                    //min_a_sample = getMin(a11, a21, a12, a22);
+                    //max_r_sample = getMax(r11, r21, r12, r22);
+                    //max_g_sample = getMax(g11, g21, g12, g22);
+                    //max_b_sample = getMax(b11, b21, b12, b22);
+                    //max_a_sample = getMax(a11, a21, a12, a22);
+
+                    min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
                     d_edge = diagonal_edge(Y, wp);
 
                     if (d_edge <= 0)
@@ -260,14 +268,29 @@ namespace superXBR
                         af = w1 * (a[0][0] + a[3][3]) + w2 * (a[1][1] + a[2][2]);
                     }
                     // anti-ringing, clamp.
-                    rf = clamp(rf, min_r_sample, max_r_sample);
-                    gf = clamp(gf, min_g_sample, max_g_sample);
-                    bf = clamp(bf, min_b_sample, max_b_sample);
-                    af = clamp(af, min_a_sample, max_a_sample);
-                    ri = (byte)clamp(Math.Ceiling(rf), 0, 255);
-                    gi = (byte)clamp(Math.Ceiling(gf), 0, 255);
-                    bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
-                    ai = (byte)clamp(Math.Ceiling(af), 0, 255);
+                    rf = (rf < min_r_sample) ? min_r_sample : rf;
+                    rf = (rf > max_r_sample) ? max_r_sample : rf;
+                    gf = (gf < min_g_sample) ? min_g_sample : gf;
+                    gf = (gf > max_g_sample) ? max_g_sample : gf;
+                    bf = (bf < min_b_sample) ? min_b_sample : bf;
+                    bf = (bf > max_b_sample) ? max_b_sample : bf;
+                    af = (af < min_a_sample) ? min_a_sample : af;
+                    af = (af > max_a_sample) ? max_a_sample : af;
+
+                    ri = (byte)((rf - (byte)rf == 0) ? rf : rf + 1);
+                    gi = (byte)((gf - (byte)gf == 0) ? gf : gf + 1);
+                    bi = (byte)((bf - (byte)bf == 0) ? bf : bf + 1);
+                    ai = (byte)((af - (byte)af == 0) ? af : af + 1);
+
+                    ri = (ri < minByte) ? minByte : ri;
+                    ri = (ri > maxByte) ? maxByte : ri;
+                    gi = (gi < minByte) ? minByte : gi;
+                    gi = (gi > maxByte) ? maxByte : gi;
+                    bi = (bi < minByte) ? minByte : bi;
+                    bi = (bi > maxByte) ? maxByte : bi;
+                    ai = (ai < minByte) ? minByte : ai;
+                    ai = (ai > maxByte) ? maxByte : ai;
+
                     resultData[y, x, 0] = resultData[y, x + 1, 0] = resultData[y + 1, x, 0] = imageData[cy, cx, 0];
                     resultData[y, x, 1] = resultData[y, x + 1, 1] = resultData[y + 1, x, 1] = imageData[cy, cx, 1];
                     resultData[y, x, 2] = resultData[y, x + 1, 2] = resultData[y + 1, x, 2] = imageData[cy, cx, 2];
@@ -281,9 +304,9 @@ namespace superXBR
                 ++y;
             }
             #endregion
+            //result.Data = resultData;
+            //CvInvoke.Imwrite("result1.png", result);
 
-            result.Data = resultData;
-            CvInvoke.Imwrite("result1.png", result);
 
             #region Second Pass
             wp[0] = 2.0;
@@ -303,8 +326,13 @@ namespace superXBR
                         for (int sy = -1; sy <= 2; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sx - sy + y, 0, bigH - 1);
-                            int csx = (int)clamp(sx + sy + x, 0, bigW - 1);
+                            int csy = sx - sy + y;
+                            int csx = sx + sy + x;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > bigH - 1) ? bigH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > bigW - 1) ? bigW - 1 : csx;
+
                             // sample & add weighted components
                             byte bSample = resultData[csy, csx, 0];
                             byte gSample = resultData[csy, csx, 1];
@@ -319,39 +347,39 @@ namespace superXBR
                         }
                     }
 
-                    int r11 = r[1][1];
-                    int r21 = r[1][1];
-                    int r12 = r[1][1];
-                    int r22 = r[1][1];
-                    int g11 = g[1][1];
-                    int g21 = g[2][1];
-                    int g12 = g[1][2];
-                    int g22 = g[2][2];
-                    int b11 = b[1][1];
-                    int b21 = b[2][1];
-                    int b12 = b[1][2];
-                    int b22 = b[2][2];
-                    int a11 = r[1][1];
-                    int a21 = r[2][1];
-                    int a12 = r[1][2];
-                    int a22 = r[2][2];
+                    //int r11 = r[1][1];
+                    //int r21 = r[1][1];
+                    //int r12 = r[1][1];
+                    //int r22 = r[1][1];
+                    //int g11 = g[1][1];
+                    //int g21 = g[2][1];
+                    //int g12 = g[1][2];
+                    //int g22 = g[2][2];
+                    //int b11 = b[1][1];
+                    //int b21 = b[2][1];
+                    //int b12 = b[1][2];
+                    //int b22 = b[2][2];
+                    //int a11 = r[1][1];
+                    //int a21 = r[2][1];
+                    //int a12 = r[1][2];
+                    //int a22 = r[2][2];
+                    //min_r_sample = getMin(r11, r21, r12, r22);
+                    //min_g_sample = getMin(g11, g21, g12, g22);
+                    //min_b_sample = getMin(b11, b21, b12, b22);
+                    //min_a_sample = getMin(a11, a21, a12, a22);
+                    //max_r_sample = getMax(r11, r21, r12, r22);
+                    //max_g_sample = getMax(g11, g21, g12, g22);
+                    //max_b_sample = getMax(b11, b21, b12, b22);
+                    //max_a_sample = getMax(a11, a21, a12, a22);
 
-                    //min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    //min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    //min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    //min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    //max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    //max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    //max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    //max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    min_r_sample = getMin(r11, r21, r12, r22);
-                    min_g_sample = getMin(g11, g21, g12, g22);
-                    min_b_sample = getMin(b11, b21, b12, b22);
-                    min_a_sample = getMin(a11, a21, a12, a22);
-                    max_r_sample = getMax(r11, r21, r12, r22);
-                    max_g_sample = getMax(g11, g21, g12, g22);
-                    max_b_sample = getMax(b11, b21, b12, b22);
-                    max_a_sample = getMax(a11, a21, a12, a22);
+                    min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
 
                     d_edge = diagonal_edge(Y, wp);
                     if (d_edge <= 0)
@@ -370,14 +398,29 @@ namespace superXBR
                     }
 
                     // anti-ringing, clamp.
-                    rf = clamp(rf, min_r_sample, max_r_sample);
-                    gf = clamp(gf, min_g_sample, max_g_sample);
-                    bf = clamp(bf, min_b_sample, max_b_sample);
-                    af = clamp(af, min_a_sample, max_a_sample);
-                    ri = (byte)clamp(Math.Ceiling(rf), 0, 255);
-                    gi = (byte)clamp(Math.Ceiling(gf), 0, 255);
-                    bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
-                    ai = (byte)clamp(Math.Ceiling(af), 0, 255);
+                    rf = (rf < min_r_sample) ? min_r_sample : rf;
+                    rf = (rf > max_r_sample) ? max_r_sample : rf;
+                    gf = (gf < min_g_sample) ? min_g_sample : gf;
+                    gf = (gf > max_g_sample) ? max_g_sample : gf;
+                    bf = (bf < min_b_sample) ? min_b_sample : bf;
+                    bf = (bf > max_b_sample) ? max_b_sample : bf;
+                    af = (af < min_a_sample) ? min_a_sample : af;
+                    af = (af > max_a_sample) ? max_a_sample : af;
+
+                    ri = (byte)((rf - (byte)rf == 0) ? rf : rf + 1);
+                    gi = (byte)((gf - (byte)gf == 0) ? gf : gf + 1);
+                    bi = (byte)((bf - (byte)bf == 0) ? bf : bf + 1);
+                    ai = (byte)((af - (byte)af == 0) ? af : af + 1);
+
+                    ri = (ri < minByte) ? minByte : ri;
+                    ri = (ri > maxByte) ? maxByte : ri;
+                    gi = (gi < minByte) ? minByte : gi;
+                    gi = (gi > maxByte) ? maxByte : gi;
+                    bi = (bi < minByte) ? minByte : bi;
+                    bi = (bi > maxByte) ? maxByte : bi;
+                    ai = (ai < minByte) ? minByte : ai;
+                    ai = (ai > maxByte) ? maxByte : ai;
+
                     resultData[y, x + 1, 0] = bi;
                     resultData[y, x + 1, 1] = gi;
                     resultData[y, x + 1, 2] = ri;
@@ -388,8 +431,13 @@ namespace superXBR
                         for (int sy = -1; sy <= 2; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sx - sy + 1 + y, 0, bigH - 1);
-                            int csx = (int)clamp(sx + sy - 1 + x, 0, bigW - 1);
+                            int csy = sx - sy + 1 + y;
+                            int csx = sx + sy - 1 + x;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > bigH - 1) ? bigH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > bigW - 1) ? bigW - 1 : csx;
+
                             // sample & add weighted components
                             byte bSample = resultData[csy, csx, 0];
                             byte gSample = resultData[csy, csx, 1];
@@ -420,14 +468,28 @@ namespace superXBR
                         af = w3 * (a[0][0] + a[3][3]) + w4 * (a[1][1] + a[2][2]);
                     }
                     // anti-ringing, clamp.
-                    rf = clamp(rf, min_r_sample, max_r_sample);
-                    gf = clamp(gf, min_g_sample, max_g_sample);
-                    bf = clamp(bf, min_b_sample, max_b_sample);
-                    af = clamp(af, min_a_sample, max_a_sample);
-                    ri = (byte)clamp(Math.Ceiling(rf), 0, 255);
-                    gi = (byte)clamp(Math.Ceiling(gf), 0, 255);
-                    bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
-                    ai = (byte)clamp(Math.Ceiling(af), 0, 255);
+                    rf = (rf < min_r_sample) ? min_r_sample : rf;
+                    rf = (rf > max_r_sample) ? max_r_sample : rf;
+                    gf = (gf < min_g_sample) ? min_g_sample : gf;
+                    gf = (gf > max_g_sample) ? max_g_sample : gf;
+                    bf = (bf < min_b_sample) ? min_b_sample : bf;
+                    bf = (bf > max_b_sample) ? max_b_sample : bf;
+                    af = (af < min_a_sample) ? min_a_sample : af;
+                    af = (af > max_a_sample) ? max_a_sample : af;
+
+                    ri = (byte)((rf - (byte)rf == 0) ? rf : rf + 1);
+                    gi = (byte)((gf - (byte)gf == 0) ? gf : gf + 1);
+                    bi = (byte)((bf - (byte)bf == 0) ? bf : bf + 1);
+                    ai = (byte)((af - (byte)af == 0) ? af : af + 1);
+
+                    ri = (ri < minByte) ? minByte : ri;
+                    ri = (ri > maxByte) ? maxByte : ri;
+                    gi = (gi < minByte) ? minByte : gi;
+                    gi = (gi > maxByte) ? maxByte : gi;
+                    bi = (bi < minByte) ? minByte : bi;
+                    bi = (bi > maxByte) ? maxByte : bi;
+                    ai = (ai < minByte) ? minByte : ai;
+                    ai = (ai > maxByte) ? maxByte : ai;
 
                     resultData[y + 1, x, 0] = bi;
                     resultData[y + 1, x, 1] = gi;
@@ -438,9 +500,8 @@ namespace superXBR
                 ++y;
             }
             #endregion
-
-            result.Data = resultData;
-            CvInvoke.Imwrite("result2.png", result);
+            //result.Data = resultData;
+            //CvInvoke.Imwrite("result2.png", result);
 
             #region Third Pass
             wp[0] = 2.0;
@@ -459,8 +520,14 @@ namespace superXBR
                         for (int sy = -2; sy <= 1; ++sy)
                         {
                             // clamp pixel locations
-                            int csy = (int)clamp(sy + y, 0, bigH - 1);
-                            int csx = (int)clamp(sx + x, 0, bigW - 1);
+                            int csy = sy + y;
+                            int csx = sx + x;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > bigH - 1) ? bigH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > bigW - 1) ? bigW - 1 : csx;
+
+
                             // sample & add weighted components
                             byte bSample = resultData[csy, csx, 0];
                             byte gSample = resultData[csy, csx, 1];
@@ -475,39 +542,39 @@ namespace superXBR
                         }
                     }
 
-                    int r11 = r[1][1];
-                    int r21 = r[1][1];
-                    int r12 = r[1][1];
-                    int r22 = r[1][1];
-                    int g11 = g[1][1];
-                    int g21 = g[2][1];
-                    int g12 = g[1][2];
-                    int g22 = g[2][2];
-                    int b11 = b[1][1];
-                    int b21 = b[2][1];
-                    int b12 = b[1][2];
-                    int b22 = b[2][2];
-                    int a11 = r[1][1];
-                    int a21 = r[2][1];
-                    int a12 = r[1][2];
-                    int a22 = r[2][2];
+                    //int r11 = r[1][1];
+                    //int r21 = r[1][1];
+                    //int r12 = r[1][1];
+                    //int r22 = r[1][1];
+                    //int g11 = g[1][1];
+                    //int g21 = g[2][1];
+                    //int g12 = g[1][2];
+                    //int g22 = g[2][2];
+                    //int b11 = b[1][1];
+                    //int b21 = b[2][1];
+                    //int b12 = b[1][2];
+                    //int b22 = b[2][2];
+                    //int a11 = r[1][1];
+                    //int a21 = r[2][1];
+                    //int a12 = r[1][2];
+                    //int a22 = r[2][2];
+                    //min_r_sample = getMin(r11, r21, r12, r22);
+                    //min_g_sample = getMin(g11, g21, g12, g22);
+                    //min_b_sample = getMin(b11, b21, b12, b22);
+                    //min_a_sample = getMin(a11, a21, a12, a22);
+                    //max_r_sample = getMax(r11, r21, r12, r22);
+                    //max_g_sample = getMax(g11, g21, g12, g22);
+                    //max_b_sample = getMax(b11, b21, b12, b22);
+                    //max_a_sample = getMax(a11, a21, a12, a22);
 
-                    //min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    //min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    //min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    //min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    //max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
-                    //max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
-                    //max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
-                    //max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
-                    min_r_sample = getMin(r11, r21, r12, r22);
-                    min_g_sample = getMin(g11, g21, g12, g22);
-                    min_b_sample = getMin(b11, b21, b12, b22);
-                    min_a_sample = getMin(a11, a21, a12, a22);
-                    max_r_sample = getMax(r11, r21, r12, r22);
-                    max_g_sample = getMax(g11, g21, g12, g22);
-                    max_b_sample = getMax(b11, b21, b12, b22);
-                    max_a_sample = getMax(a11, a21, a12, a22);
+                    min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    min_a_sample = getMin(a[1][1], a[2][1], a[1][2], a[2][2]);
+                    max_r_sample = getMax(r[1][1], r[2][1], r[1][2], r[2][2]);
+                    max_g_sample = getMax(g[1][1], g[2][1], g[1][2], g[2][2]);
+                    max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
+                    max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
                     d_edge = diagonal_edge(Y, wp);
                     if (d_edge <= 0)
                     {
@@ -525,14 +592,28 @@ namespace superXBR
                     }
 
                     // anti-ringing, clamp.
-                    rf = clamp(rf, min_r_sample, max_r_sample);
-                    gf = clamp(gf, min_g_sample, max_g_sample);
-                    bf = clamp(bf, min_b_sample, max_b_sample);
-                    af = clamp(af, min_a_sample, max_a_sample);
-                    ri = (byte)clamp(Math.Ceiling(rf), 0, 255);
-                    gi = (byte)clamp(Math.Ceiling(gf), 0, 255);
-                    bi = (byte)clamp(Math.Ceiling(bf), 0, 255);
-                    ai = (byte)clamp(Math.Ceiling(af), 0, 255);
+                    rf = (rf < min_r_sample) ? min_r_sample : rf;
+                    rf = (rf > max_r_sample) ? max_r_sample : rf;
+                    gf = (gf < min_g_sample) ? min_g_sample : gf;
+                    gf = (gf > max_g_sample) ? max_g_sample : gf;
+                    bf = (bf < min_b_sample) ? min_b_sample : bf;
+                    bf = (bf > max_b_sample) ? max_b_sample : bf;
+                    af = (af < min_a_sample) ? min_a_sample : af;
+                    af = (af > max_a_sample) ? max_a_sample : af;
+
+                    ri = (byte)((rf - (byte)rf == 0) ? rf : rf + 1);
+                    gi = (byte)((gf - (byte)gf == 0) ? gf : gf + 1);
+                    bi = (byte)((bf - (byte)bf == 0) ? bf : bf + 1);
+                    ai = (byte)((af - (byte)af == 0) ? af : af + 1);
+
+                    ri = (ri < minByte) ? minByte : ri;
+                    ri = (ri > maxByte) ? maxByte : ri;
+                    gi = (gi < minByte) ? minByte : gi;
+                    gi = (gi > maxByte) ? maxByte : gi;
+                    bi = (bi < minByte) ? minByte : bi;
+                    bi = (bi > maxByte) ? maxByte : bi;
+                    ai = (ai < minByte) ? minByte : ai;
+                    ai = (ai > maxByte) ? maxByte : ai;
 
                     resultData[y, x, 0] = bi;
                     resultData[y, x, 1] = gi;
@@ -541,8 +622,14 @@ namespace superXBR
                 }
             }
             #endregion
-
             result.Data = resultData;
+
+
+            //Console.WriteLine("preprocessing-xBR takes :" + preprocessing + "ms");
+            //Console.WriteLine("firstPass takes :" + firstPass + "ms");
+            //Console.WriteLine("secondPass takes :" + secondPass + "ms");
+            //Console.WriteLine("thirdPass takes :" + thirdPass + "ms");
+
             return true;
         }
     }
