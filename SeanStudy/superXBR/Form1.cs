@@ -179,7 +179,17 @@ namespace superXBR
             byte[,,] imageData = image.Data;
             byte[,,] resultData = result.Data;
 
- 
+            double[] rWeight = new double[256];
+            double[] gWeight = new double[256];
+            double[] bWeight = new double[256];
+
+            for (int i = 0; i < 256; i++)
+            {
+                rWeight[i] = 0.2126 * i;
+                gWeight[i] = 0.7152 * i;
+                bWeight[i] = 0.0722 * i;
+            }
+
             #region First Pass
             double[] wp = new double[] { 2.0, 1.0, -1.0, 4.0, -1.0, 1.0 };
             for (int y = 0; y < bigH; ++y)
@@ -213,7 +223,7 @@ namespace superXBR
                             g[sx + 1][sy + 1] = gSample;
                             b[sx + 1][sy + 1] = bSample;
                             a[sx + 1][sy + 1] = aSample;
-                            Y[sx + 1][sy + 1] = (0.2126 * r[sx + 1][sy + 1] + 0.7152 * g[sx + 1][sy + 1] + 0.0722 * b[sx + 1][sy + 1]);
+                            Y[sx + 1][sy + 1] = rWeight[rSample] + gWeight[gSample] + bWeight[bSample];
                         }
                     }
 
@@ -343,7 +353,7 @@ namespace superXBR
                             g[sx + 1][sy + 1] = gSample;
                             b[sx + 1][sy + 1] = bSample;
                             a[sx + 1][sy + 1] = aSample;
-                            Y[sx + 1][sy + 1] = (0.2126 * r[sx + 1][sy + 1] + 0.7152 * g[sx + 1][sy + 1] + 0.0722 * b[sx + 1][sy + 1]);
+                            Y[sx + 1][sy + 1] = rWeight[rSample] + gWeight[gSample] + bWeight[bSample];
                         }
                     }
 
@@ -448,7 +458,7 @@ namespace superXBR
                             g[sx + 1][sy + 1] = gSample;
                             b[sx + 1][sy + 1] = bSample;
                             a[sx + 1][sy + 1] = aSample;
-                            Y[sx + 1][sy + 1] = (0.2126 * r[sx + 1][sy + 1] + 0.7152 * g[sx + 1][sy + 1] + 0.0722 * b[sx + 1][sy + 1]);
+                            Y[sx + 1][sy + 1] = rWeight[rSample] + gWeight[gSample] + bWeight[bSample];
                         }
                     }
                     d_edge = diagonal_edge(Y, wp);
@@ -538,7 +548,7 @@ namespace superXBR
                             g[sx + 2][sy + 2] = gSample;
                             b[sx + 2][sy + 2] = bSample;
                             a[sx + 2][sy + 2] = aSample;
-                            Y[sx + 2][sy + 2] = (0.2126 * r[sx + 2][sy + 2] + 0.7152 * g[sx + 2][sy + 2] + 0.0722 * b[sx + 2][sy + 2]);
+                            Y[sx + 2][sy + 2] = rWeight[rSample] + gWeight[gSample] + bWeight[bSample];
                         }
                     }
 
