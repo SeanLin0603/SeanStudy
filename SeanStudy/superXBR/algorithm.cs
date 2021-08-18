@@ -1,81 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Windows.Forms;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace superXBR
+namespace Corex.VisionLib_410.Algorithm
 {
-    public partial class Form1 : Form
+    public class SuperxBR
     {
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
-        private void btnLoad_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog ofd = new OpenFileDialog())
-            {
-                if (ofd.ShowDialog() == DialogResult.OK)
-                {
-                    var inputImage = new Image<Bgra, byte>(ofd.FileName);
-
-                    doing(inputImage);
-                }
-            }
-        }
-
-        private void doing(Image<Bgra, byte> image)
-        {
-            int scale = 2;
-
-            Image<Bgra, byte> result = image.Clone();
-            Stopwatch sw = new Stopwatch();
-            sw.Reset();
-            sw.Start();
-            SuperxBR(image, scale, out result);
-            sw.Stop();
-            string timeXBR = sw.Elapsed.TotalMilliseconds.ToString();
-
-            sw.Reset();
-            sw.Start();
-            var resizeImg = image.Resize(scale, Emgu.CV.CvEnum.Inter.Lanczos4);
-            sw.Stop();
-            string timeResize = sw.Elapsed.TotalMilliseconds.ToString();
-
-            Console.WriteLine("Super-xBR takes :" + timeXBR + "ms");
-            Console.WriteLine("OpenCV resize takes :" + timeResize + "ms");
-
-            CvInvoke.Imshow("inputImage", image);
-            CvInvoke.Imshow("result", result);
-            CvInvoke.Imwrite("result.png", result);
-
-            CvInvoke.Imshow("resizeImg", resizeImg);
-            CvInvoke.Imwrite("resizeImg.png", resizeImg);
-        }
-
-
-        private double df(double a, double b)
+        private static double df(double a, double b)
         {
             return Math.Abs(a - b);
         }
 
-        //private double clamp(double x, double floor, double ceil)
-        //{
-        //    if (x > ceil)
-        //    {
-        //        x = ceil;
-        //    }
-        //    if (x < floor)
-        //    {
-        //        x = floor;
-        //    }
-        //    return x;
-        //    //return Math.Max(Math.Min(x, ceil), floor);
-        //}
-
-        private int getMin(int a, int b, int c, int d)
+        private static int getMin(int a, int b, int c, int d)
         {
             //int minVal = int.MaxValue;
             //if (a < minVal) minVal = a;
@@ -90,7 +26,7 @@ namespace superXBR
             return minVal;
         }
 
-        private int getMax(int a, int b, int c, int d)
+        private static int getMax(int a, int b, int c, int d)
         {
             //int maxVal = int.MinValue;
             //if (a > maxVal) maxVal = a;
@@ -105,7 +41,7 @@ namespace superXBR
             return maxVal;
         }
 
-        private int[][] fourByfourIntMat()
+        private static int[][] fourByfourIntMat()
         {
             int[][] array = new int[4][];
             array[0] = new int[4];
@@ -115,7 +51,7 @@ namespace superXBR
             return array;
         }
 
-        private double[][] fourByfourDoubleMat()
+        private static double[][] fourByfourDoubleMat()
         {
             double[][] array = new double[4][];
             array[0] = new double[4];
@@ -125,7 +61,7 @@ namespace superXBR
             return array;
         }
 
-        private double diagonal_edge(double[][] mat1, double[] wp)
+        private static double diagonal_edge(double[][] mat1, double[] wp)
         {
             double dw1 = wp[0] * (df(mat1[0][2], mat1[1][1]) + df(mat1[1][1], mat1[2][0]) + df(mat1[1][3], mat1[2][2]) + df(mat1[2][2], mat1[3][1])) +
                         wp[1] * (df(mat1[0][3], mat1[1][2]) + df(mat1[2][1], mat1[3][0])) +
@@ -144,11 +80,18 @@ namespace superXBR
             return (dw1 - dw2);
         }
 
-        public bool SuperxBR(Image<Bgra, byte> image, int factor, out Image<Bgra, byte> result)
+        public static bool SuperxbrScaling(Image<Bgra, byte> image, int factor, out Image<Bgra, byte> result)
         {
             byte minByte = 0;
             byte maxByte = 255;
+            int smallW = image.Width;
+            int smallH = image.Height;
+            int bigW = smallW * factor;
+            int bigH = smallH * factor;
 
+            result = new Image<Bgra, byte>(bigW, bigH);
+
+            // weight
             double wgt1 = 0.129633;
             double wgt2 = 0.129633;
             double w1 = -wgt1;
@@ -156,18 +99,12 @@ namespace superXBR
             double w3 = -wgt2;
             double w4 = wgt2 + 0.5;
 
-            int smallW = image.Width;
-            int smallH = image.Height;
-            int bigW = smallW * factor;
-            int bigH = smallH * factor;
-            result = new Image<Bgra, byte>(bigW, bigH);
-
+            // initialization
             int[][] r = fourByfourIntMat();
             int[][] b = fourByfourIntMat();
             int[][] g = fourByfourIntMat();
             int[][] a = fourByfourIntMat();
             double[][] Y = fourByfourDoubleMat();
-
             double rf, gf, bf, af;
             byte ri, gi, bi, ai;
             double d_edge;
@@ -226,32 +163,6 @@ namespace superXBR
                             Y[sx + 1][sy + 1] = rWeight[rSample] + gWeight[gSample] + bWeight[bSample];
                         }
                     }
-
-                    //int r11 = r[1][1];
-                    //int r21 = r[1][1];
-                    //int r12 = r[1][1];
-                    //int r22 = r[1][1];
-                    //int g11 = g[1][1];
-                    //int g21 = g[2][1];
-                    //int g12 = g[1][2];
-                    //int g22 = g[2][2];
-                    //int b11 = b[1][1];
-                    //int b21 = b[2][1];
-                    //int b12 = b[1][2];
-                    //int b22 = b[2][2];
-                    //int a11 = r[1][1];
-                    //int a21 = r[2][1];
-                    //int a12 = r[1][2];
-                    //int a22 = r[2][2];
-
-                    //min_r_sample = getMin(r11, r21, r12, r22);
-                    //min_g_sample = getMin(g11, g21, g12, g22);
-                    //min_b_sample = getMin(b11, b21, b12, b22);
-                    //min_a_sample = getMin(a11, a21, a12, a22);
-                    //max_r_sample = getMax(r11, r21, r12, r22);
-                    //max_g_sample = getMax(g11, g21, g12, g22);
-                    //max_b_sample = getMax(b11, b21, b12, b22);
-                    //max_a_sample = getMax(a11, a21, a12, a22);
 
                     min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
                     min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
@@ -314,9 +225,6 @@ namespace superXBR
                 ++y;
             }
             #endregion
-            //result.Data = resultData;
-            //CvInvoke.Imwrite("result1.png", result);
-
 
             #region Second Pass
             wp[0] = 2.0;
@@ -356,31 +264,6 @@ namespace superXBR
                             Y[sx + 1][sy + 1] = rWeight[rSample] + gWeight[gSample] + bWeight[bSample];
                         }
                     }
-
-                    //int r11 = r[1][1];
-                    //int r21 = r[1][1];
-                    //int r12 = r[1][1];
-                    //int r22 = r[1][1];
-                    //int g11 = g[1][1];
-                    //int g21 = g[2][1];
-                    //int g12 = g[1][2];
-                    //int g22 = g[2][2];
-                    //int b11 = b[1][1];
-                    //int b21 = b[2][1];
-                    //int b12 = b[1][2];
-                    //int b22 = b[2][2];
-                    //int a11 = r[1][1];
-                    //int a21 = r[2][1];
-                    //int a12 = r[1][2];
-                    //int a22 = r[2][2];
-                    //min_r_sample = getMin(r11, r21, r12, r22);
-                    //min_g_sample = getMin(g11, g21, g12, g22);
-                    //min_b_sample = getMin(b11, b21, b12, b22);
-                    //min_a_sample = getMin(a11, a21, a12, a22);
-                    //max_r_sample = getMax(r11, r21, r12, r22);
-                    //max_g_sample = getMax(g11, g21, g12, g22);
-                    //max_b_sample = getMax(b11, b21, b12, b22);
-                    //max_a_sample = getMax(a11, a21, a12, a22);
 
                     min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
                     min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
@@ -510,8 +393,6 @@ namespace superXBR
                 ++y;
             }
             #endregion
-            //result.Data = resultData;
-            //CvInvoke.Imwrite("result2.png", result);
 
             #region Third Pass
             wp[0] = 2.0;
@@ -552,31 +433,6 @@ namespace superXBR
                         }
                     }
 
-                    //int r11 = r[1][1];
-                    //int r21 = r[1][1];
-                    //int r12 = r[1][1];
-                    //int r22 = r[1][1];
-                    //int g11 = g[1][1];
-                    //int g21 = g[2][1];
-                    //int g12 = g[1][2];
-                    //int g22 = g[2][2];
-                    //int b11 = b[1][1];
-                    //int b21 = b[2][1];
-                    //int b12 = b[1][2];
-                    //int b22 = b[2][2];
-                    //int a11 = r[1][1];
-                    //int a21 = r[2][1];
-                    //int a12 = r[1][2];
-                    //int a22 = r[2][2];
-                    //min_r_sample = getMin(r11, r21, r12, r22);
-                    //min_g_sample = getMin(g11, g21, g12, g22);
-                    //min_b_sample = getMin(b11, b21, b12, b22);
-                    //min_a_sample = getMin(a11, a21, a12, a22);
-                    //max_r_sample = getMax(r11, r21, r12, r22);
-                    //max_g_sample = getMax(g11, g21, g12, g22);
-                    //max_b_sample = getMax(b11, b21, b12, b22);
-                    //max_a_sample = getMax(a11, a21, a12, a22);
-
                     min_r_sample = getMin(r[1][1], r[2][1], r[1][2], r[2][2]);
                     min_g_sample = getMin(g[1][1], g[2][1], g[1][2], g[2][2]);
                     min_b_sample = getMin(b[1][1], b[2][1], b[1][2], b[2][2]);
@@ -586,6 +442,7 @@ namespace superXBR
                     max_b_sample = getMax(b[1][1], b[2][1], b[1][2], b[2][2]);
                     max_a_sample = getMax(a[1][1], a[2][1], a[1][2], a[2][2]);
                     d_edge = diagonal_edge(Y, wp);
+
                     if (d_edge <= 0)
                     {
                         rf = w1 * (r[0][3] + r[3][0]) + w2 * (r[1][2] + r[2][1]);
@@ -634,7 +491,6 @@ namespace superXBR
             #endregion
             result.Data = resultData;
 
-
             //Console.WriteLine("preprocessing-xBR takes :" + preprocessing + "ms");
             //Console.WriteLine("firstPass takes :" + firstPass + "ms");
             //Console.WriteLine("secondPass takes :" + secondPass + "ms");
@@ -642,5 +498,6 @@ namespace superXBR
 
             return true;
         }
+
     }
 }
