@@ -499,5 +499,255 @@ namespace Corex.VisionLib_410.Algorithm
             return true;
         }
 
+        public static bool SuperxbrScalingGray(Image<Gray, byte> image, int factor, out Image<Gray, byte> result)
+        {
+            byte minByte = 0;
+            byte maxByte = 255;
+
+            double wgt1 = 0.129633;
+            double wgt2 = 0.129633;
+            double w1 = -wgt1;
+            double w2 = wgt1 + 0.5;
+            double w3 = -wgt2;
+            double w4 = wgt2 + 0.5;
+
+            int smallW = image.Width;
+            int smallH = image.Height;
+            int bigW = smallW * factor;
+            int bigH = smallH * factor;
+            result = new Image<Gray, byte>(bigW, bigH);
+
+            int[][] pixel = fourByfourIntMat();
+            double[][] Y = fourByfourDoubleMat();
+
+            double pixelF, pixelMin, pixelMax;
+            byte pixelByte;
+            double d_edge;
+
+            byte[,,] imageData = image.Data;
+            byte[,,] resultData = result.Data;
+
+
+            #region First Pass
+            double[] wp = new double[] { 2.0, 1.0, -1.0, 4.0, -1.0, 1.0 };
+            for (int y = 0; y < bigH; ++y)
+            {
+                for (int x = 0; x < bigW; ++x)
+                {
+                    // central pixels on original images
+                    int cx = x / factor;
+                    int cy = y / factor;
+
+                    // sample supporting pixels in original image
+                    for (int sx = -1; sx <= 2; ++sx)
+                    {
+                        for (int sy = -1; sy <= 2; ++sy)
+                        {
+                            // clamp pixel locations
+                            int csy = sy + cy;
+                            int csx = sx + cx;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > smallH - 1) ? smallH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > smallW - 1) ? smallW - 1 : csx;
+
+                            // sample & add weighted components
+                            byte sample = imageData[csy, csx, 0];
+
+                            pixel[sx + 1][sy + 1] = sample;
+                            Y[sx + 1][sy + 1] = sample;
+                        }
+                    }
+
+                    pixelMin = getMin(pixel[1][1], pixel[2][1], pixel[1][2], pixel[2][2]);
+                    pixelMax = getMax(pixel[1][1], pixel[2][1], pixel[1][2], pixel[2][2]);
+                    d_edge = diagonal_edge(Y, wp);
+
+                    if (d_edge <= 0)
+                    {
+                        pixelF = w1 * (pixel[0][3] + pixel[3][0]) + w2 * (pixel[1][2] + pixel[2][1]);
+                    }
+                    else
+                    {
+                        pixelF = w1 * (pixel[0][0] + pixel[3][3]) + w2 * (pixel[1][1] + pixel[2][2]);
+                    }
+                    // anti-ringing, clamp.
+                    pixelF = (pixelF < pixelMin) ? pixelMin : pixelF;
+                    pixelF = (pixelF > pixelMax) ? pixelMax : pixelF;
+
+                    pixelByte = (byte)((pixelF - (byte)pixelF == 0) ? pixelF : pixelF + 1);
+
+                    pixelByte = (pixelByte < minByte) ? minByte : pixelByte;
+                    pixelByte = (pixelByte > maxByte) ? maxByte : pixelByte;
+
+                    resultData[y, x, 0] = resultData[y, x + 1, 0] = resultData[y + 1, x, 0] = imageData[cy, cx, 0];
+                    resultData[y + 1, x + 1, 0] = pixelByte;
+                    ++x;
+                }
+                ++y;
+            }
+            #endregion
+
+            #region Second Pass
+            wp[0] = 2.0;
+            wp[1] = 0.0;
+            wp[2] = 0.0;
+            wp[3] = 0.0;
+            wp[4] = 0.0;
+            wp[5] = 0.0;
+
+            for (int y = 0; y < bigH; ++y)
+            {
+                for (int x = 0; x < bigW; ++x)
+                {
+                    // sample supporting pixels in original image
+                    for (int sx = -1; sx <= 2; ++sx)
+                    {
+                        for (int sy = -1; sy <= 2; ++sy)
+                        {
+                            // clamp pixel locations
+                            int csy = sx - sy + y;
+                            int csx = sx + sy + x;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > bigH - 1) ? bigH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > bigW - 1) ? bigW - 1 : csx;
+
+                            // sample & add weighted components
+                            byte sample = resultData[csy, csx, 0];
+
+                            pixel[sx + 1][sy + 1] = sample;
+                            Y[sx + 1][sy + 1] = sample;
+                        }
+                    }
+
+                    pixelMin = getMin(pixel[1][1], pixel[2][1], pixel[1][2], pixel[2][2]);
+                    pixelMax = getMax(pixel[1][1], pixel[2][1], pixel[1][2], pixel[2][2]);
+                    d_edge = diagonal_edge(Y, wp);
+
+                    if (d_edge <= 0)
+                    {
+                        pixelF = w3 * (pixel[0][3] + pixel[3][0]) + w4 * (pixel[1][2] + pixel[2][1]);
+                    }
+                    else
+                    {
+                        pixelF = w3 * (pixel[0][0] + pixel[3][3]) + w4 * (pixel[1][1] + pixel[2][2]);
+                    }
+
+                    // anti-ringing, clamp.
+                    pixelF = (pixelF < pixelMin) ? pixelMin : pixelF;
+                    pixelF = (pixelF > pixelMax) ? pixelMax : pixelF;
+
+                    pixelByte = (byte)((pixelF - (byte)pixelF == 0) ? pixelF : pixelF + 1);
+                    pixelByte = (pixelByte < minByte) ? minByte : pixelByte;
+                    pixelByte = (pixelByte > maxByte) ? maxByte : pixelByte;
+                    resultData[y, x + 1, 0] = pixelByte;
+
+                    for (int sx = -1; sx <= 2; ++sx)
+                    {
+                        for (int sy = -1; sy <= 2; ++sy)
+                        {
+                            // clamp pixel locations
+                            int csy = sx - sy + 1 + y;
+                            int csx = sx + sy - 1 + x;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > bigH - 1) ? bigH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > bigW - 1) ? bigW - 1 : csx;
+
+                            // sample & add weighted components
+                            byte sample = resultData[csy, csx, 0];
+
+                            pixel[sx + 1][sy + 1] = sample;
+                            Y[sx + 1][sy + 1] = sample;
+                        }
+                    }
+                    d_edge = diagonal_edge(Y, wp);
+
+                    if (d_edge <= 0)
+                    {
+                        pixelF = w3 * (pixel[0][3] + pixel[3][0]) + w4 * (pixel[1][2] + pixel[2][1]);
+                    }
+                    else
+                    {
+                        pixelF = w3 * (pixel[0][0] + pixel[3][3]) + w4 * (pixel[1][1] + pixel[2][2]);
+                    }
+                    // anti-ringing, clamp.
+                    pixelF = (pixelF < pixelMin) ? pixelMin : pixelF;
+                    pixelF = (pixelF > pixelMax) ? pixelMax : pixelF;
+
+                    pixelByte = (byte)((pixelF - (byte)pixelF == 0) ? pixelF : pixelF + 1);
+                    pixelByte = (pixelByte < minByte) ? minByte : pixelByte;
+                    pixelByte = (pixelByte > maxByte) ? maxByte : pixelByte;
+
+                    resultData[y + 1, x, 0] = pixelByte;
+                    ++x;
+                }
+                ++y;
+            }
+            #endregion
+
+            #region Third Pass
+            wp[0] = 2.0;
+            wp[1] = 1.0;
+            wp[2] = -1.0;
+            wp[3] = 4.0;
+            wp[4] = -1.0;
+            wp[5] = 1.0;
+
+            for (int y = bigH - 1; y >= 0; --y)
+            {
+                for (int x = bigW - 1; x >= 0; --x)
+                {
+                    for (int sx = -2; sx <= 1; ++sx)
+                    {
+                        for (int sy = -2; sy <= 1; ++sy)
+                        {
+                            // clamp pixel locations
+                            int csy = sy + y;
+                            int csx = sx + x;
+                            csy = (csy < 0) ? 0 : csy;
+                            csy = (csy > bigH - 1) ? bigH - 1 : csy;
+                            csx = (csx < 0) ? 0 : csx;
+                            csx = (csx > bigW - 1) ? bigW - 1 : csx;
+
+                            // sample & add weighted components
+                            byte sample = resultData[csy, csx, 0];
+
+                            pixel[sx + 2][sy + 2] = sample;
+                            Y[sx + 2][sy + 2] = sample;
+                        }
+                    }
+
+                    pixelMin = getMin(pixel[1][1], pixel[2][1], pixel[1][2], pixel[2][2]);
+                    pixelMax = getMax(pixel[1][1], pixel[2][1], pixel[1][2], pixel[2][2]);
+                    d_edge = diagonal_edge(Y, wp);
+
+                    if (d_edge <= 0)
+                    {
+                        pixelF = w1 * (pixel[0][3] + pixel[3][0]) + w2 * (pixel[1][2] + pixel[2][1]);
+                    }
+                    else
+                    {
+                        pixelF = w1 * (pixel[0][0] + pixel[3][3]) + w2 * (pixel[1][1] + pixel[2][2]);
+                    }
+
+                    // anti-ringing, clamp.
+                    pixelF = (pixelF < pixelMin) ? pixelMin : pixelF;
+                    pixelF = (pixelF > pixelMax) ? pixelMax : pixelF;
+
+                    pixelByte = (byte)((pixelF - (byte)pixelF == 0) ? pixelF : pixelF + 1);
+                    pixelByte = (pixelByte < minByte) ? minByte : pixelByte;
+                    pixelByte = (pixelByte > maxByte) ? maxByte : pixelByte;
+
+                    resultData[y, x, 0] = pixelByte;
+                }
+            }
+            #endregion
+            result.Data = resultData;
+
+            return true;
+        }
+
     }
 }

@@ -31,14 +31,25 @@ namespace superXBR
         private void btnDo_Click(object sender, EventArgs e)
         {
             int factor = int.Parse(txtScale.Text);
-            Image<Bgra, byte> result;
 
+            // BGRA
+            Image<Bgra, byte> result;
             Stopwatch sw = new Stopwatch();
             sw.Reset();
             sw.Start();
             bool isOk = SuperxBR.SuperxbrScaling(inputImage, factor, out result);
             sw.Stop();
             string costTime = sw.Elapsed.TotalMilliseconds.ToString();
+
+            // GRAY
+            //Image<Gray, byte> grayImg = inputImage.Convert<Gray, byte>();
+            //Image<Gray, byte> result;
+            //Stopwatch sw = new Stopwatch();
+            //sw.Reset();
+            //sw.Start();
+            //bool isOk = SuperxBR.SuperxbrScalingGray(grayImg, factor, out result);
+            //sw.Stop();
+            //string costTime = sw.Elapsed.TotalMilliseconds.ToString();
 
             if (isOk)
             {
